@@ -12,6 +12,7 @@ function frame(now) {
 }
 
 resize();
+spawnKoi();
 addEventListener("resize", resize);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize); // re-measure once the web fonts arrive
 requestAnimationFrame(frame);

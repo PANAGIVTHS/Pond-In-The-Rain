@@ -1,17 +1,28 @@
 /* =============================================================================
    Rendering. Each frame, in order:
    1. light layers: the caustic net and ripple rings
-   2. composite: every cell becomes water, plus ripples and light
-   3. things on the surface: rain
-   4. paint: one character per cell onto the canvas
+   2. koi, deepest first, into the koi layer
+   3. composite: every cell becomes koi or water, plus ripples and light
+   4. things on the surface: rain
+   5. paint: one character per cell onto the canvas
    ============================================================================= */
+
+const KOI_RAMP = "@%#&8o*+:"; // koi shading: dense in shadow → sparse in light
+const LIGHT_DIR = (() => {    // light from the upper left
+  const v = [-0.42, -0.56, 0.72], l = Math.hypot(...v);
+  return v.map(x => x / l);
+})();
 
 function render() {
   rippleStrength.fill(0);
+  koiShadow.fill(0);
+  koiDepth.fill(-1);
   const aspect = CH / CW;
 
   drawCaustics(aspect);
   drawRipples();
+  fish.sort((a, b) => a.depth - b.depth); // deep koi first
+  for (const f of fish) stampKoi(f);
   composite(aspect);
 
   drawSurfaceBits();
@@ -54,25 +65,188 @@ function drawRipples() {
   }
 }
 
-/** every cell becomes water, with ripples and light */
+/** draws one koi into the koi layer: a shaded tube around the spine, eyes, a forked tail,
+    pectoral fins, its shadow on the floor and a dark rim of water around it */
+function stampKoi(f) {
+  const nd = f.nodes, n = nd.length, R = f.radius, rad = BODY_PROFILE.map(p => p * R);
+
+  // cells to visit: the spine's bounding box plus room for fins and tail
+  let minx = 1e9, miny = 1e9, maxx = -1e9, maxy = -1e9;
+  for (const p of nd) {
+    minx = Math.min(minx, p.x);
+    maxx = Math.max(maxx, p.x);
+    miny = Math.min(miny, p.y);
+    maxy = Math.max(maxy, p.y);
+  }
+  const pad = R * 2.6;
+  const i0 = Math.max(0, ((minx - pad) / CW) | 0), i1 = Math.min(COLS - 1, ((maxx + pad) / CW) | 0);
+  const j0 = Math.max(0, ((miny - pad) / CH) | 0), j1 = Math.min(ROWS - 1, ((maxy + pad) / CH) | 0);
+
+  // tail: sways a beat after the body
+  const lx = nd[n - 1].x, ly = nd[n - 1].y;
+  let tdx = lx - nd[n - 2].x, tdy = ly - nd[n - 2].y;
+  const tl = Math.hypot(tdx, tdy) || 1;
+  tdx /= tl;
+  tdy /= tl;
+  const sway = Math.sin(f.tailPhase - 2.4) * 0.5, cs = Math.cos(sway), sn = Math.sin(sway);
+  const tailX = tdx * cs - tdy * sn, tailY = tdx * sn + tdy * cs, tailLen = R * 2.1;
+
+  // pectoral fins: either side of node 2, flapping slowly
+  let bx = nd[3].x - nd[1].x, by = nd[3].y - nd[1].y;
+  const bl = Math.hypot(bx, by) || 1;
+  bx /= bl;
+  by /= bl;
+  const bodyAngle = Math.atan2(by, bx);
+  const fins = [-1, 1].map(side => {
+    const a = bodyAngle + side * (0.95 + 0.25 * Math.sin(f.tailPhase * 0.8 + side));
+    return { x: nd[2].x - by * side * rad[2] * 0.75, y: nd[2].y + bx * side * rad[2] * 0.75, dx: Math.cos(a), dy: Math.sin(a) };
+  });
+
+  // eyes
+  let hx = nd[0].x - nd[1].x, hy = nd[0].y - nd[1].y;
+  const hl = Math.hypot(hx, hy) || 1;
+  hx /= hl;
+  hy /= hl;
+  const eyes = [-1, 1].map(side => ({
+    x: nd[0].x + hx * rad[0] * 0.2 - hy * side * rad[0] * 0.62,
+    y: nd[0].y + hy * rad[0] * 0.2 + hx * side * rad[0] * 0.62,
+  }));
+
+  const shadowDX = Math.round((15 * SC) / CW), shadowDY = Math.round((20 * SC) / CH);
+  const depthFade = 0.25 + 0.75 * f.depth; // deeper koi fade toward the water colour
+  const finC = f.variety.fin.map(c => lerp(c, 235, 0.25));
+
+  for (let j = j0; j <= j1; j++) {
+    const py = (j + 0.5) * CH;
+    for (let i = i0; i <= i1; i++) {
+      const px = (i + 0.5) * CW, idx = j * COLS + i;
+
+      // nearest spine segment: bk = segment, bu = how far along it, bs = which side (signed)
+      let best = 1e18, bk = 0, bu = 0, bs = 0, svx = 1, svy = 0;
+      for (let k = 0; k < n - 1; k++) {
+        const ax = nd[k].x, ay = nd[k].y, vx = nd[k + 1].x - ax, vy = nd[k + 1].y - ay, L2 = vx * vx + vy * vy || 1;
+        let u = ((px - ax) * vx + (py - ay) * vy) / L2;
+        u = u < 0 ? 0 : u > 1 ? 1 : u;
+        const qx = ax + vx * u - px, qy = ay + vy * u - py, d2 = qx * qx + qy * qy;
+        if (d2 < best) {
+          best = d2;
+          bk = k;
+          bu = u;
+          bs = vx * (py - ay) - vy * (px - ax);
+          svx = vx;
+          svy = vy;
+        }
+      }
+      const d = Math.sqrt(best), rr = rad[bk] + (rad[bk + 1] - rad[bk]) * bu;
+
+      let g = null, r = 0, gg = 0, b = 0;
+      if (d < rr) {
+        // body: treat it as a round tube and light it from the upper left
+        const sl = Math.hypot(svx, svy) || 1, pxn = -svy / sl, pyn = svx / sl;
+        const q = clamp(bs / sl / rr, -1, 1), hz = Math.sqrt(1 - q * q); // q = across the body, hz = height of the tube there
+        const lam = Math.max(0, pxn * q * LIGHT_DIR[0] + pyn * q * LIGHT_DIR[1] + hz * LIGHT_DIR[2]);
+        const tt = (bk + bu) / (n - 1), shade = clamp(0.12 + 0.88 * lam - tt * 0.15, 0, 1);
+        const pc = koiBodyColour(f, tt, q);
+        const k = 0.28 + 0.95 * shade, spec = Math.pow(lam, 14) * 70;
+        r = pc[0] * k + spec;
+        gg = pc[1] * k + spec;
+        b = pc[2] * k + spec;
+        g = KOI_RAMP[Math.min(KOI_RAMP.length - 1, (shade * KOI_RAMP.length) | 0)];
+        if (causticNet[idx] > 0.62 && lam > 0.55) {
+          g = "*"; // light glinting off its back
+          r += 40;
+          gg += 40;
+          b += 40;
+        }
+        for (const e of eyes) {
+          if (Math.hypot(px - e.x, (py - e.y) * 0.8) < CW * 0.8 && tt < 0.12) {
+            g = "•";
+            r = 18;
+            gg = 16;
+            b = 18;
+          }
+        }
+        if (j + shadowDY < ROWS && i + shadowDX < COLS) {
+          const s2 = (j + shadowDY) * COLS + i + shadowDX; // shadow on the floor
+          koiShadow[s2] = Math.max(koiShadow[s2], 0.75 * f.depth);
+        }
+      } else {
+        if (d < rr + CW * 0.9) koiShadow[idx] = Math.max(koiShadow[idx], 0.95); // dark rim of water around the body
+        // forked tail
+        const ux = px - lx, uy = py - ly, u = (ux * tailX + uy * tailY) / tailLen;
+        if (u > 0 && u < 1) {
+          const lat = Math.abs(-ux * tailY + uy * tailX), width = R * (0.18 + 0.95 * u) * (1 - 0.25 * u);
+          const fork = u > 0.7 && lat < R * 0.35 * (u - 0.7) * 3;
+          if (lat < width && !fork) {
+            g = lineGlyph(Math.atan2(uy, ux));
+            const a = 0.95 - 0.35 * u;
+            r = finC[0] * a;
+            gg = finC[1] * a;
+            b = finC[2] * a;
+          }
+        }
+        // pectoral fins: thin ellipses
+        if (!g)
+          for (const fn of fins) {
+            const ux2 = px - fn.x, uy2 = py - fn.y, a = ux2 * fn.dx + uy2 * fn.dy, c = -ux2 * fn.dy + uy2 * fn.dx;
+            if (a > 0 && (a * a) / (R * R * 1.15) + (c * c) / (R * R * 0.18) < 1) {
+              g = lineGlyph(Math.atan2(fn.dy, fn.dx));
+              const al = 0.9 - (0.3 * a) / R;
+              r = finC[0] * al;
+              gg = finC[1] * al;
+              b = finC[2] * al;
+              break;
+            }
+          }
+      }
+      if (g) {
+        koiGlyph[idx] = g;
+        koiDepth[idx] = f.depth;
+        koiR[idx] = lerp(10, r, depthFade);
+        koiG[idx] = lerp(28, gg, depthFade);
+        koiB[idx] = lerp(36, b, depthFade);
+      }
+    }
+  }
+}
+
+/** every cell becomes koi or water, with ripples and light */
 function composite(aspect) {
   for (let j = 0; j < ROWS; j++) {
     const y = j * aspect;
     for (let i = 0; i < COLS; i++) {
       const k = j * COLS + i;
       const dn = noise(i * 0.03 + t * 0.01, y * 0.03); // slow dark/light variation of the water
-      const rp = rippleStrength[k], nt = causticNet[k];
-      const L = nt * 0.9;
-      let r = 5 + dn * 6 + L * 45;
-      let g = 16 + dn * 12 + L * 120;
-      let b = 24 + dn * 14 + L * 130;
-      let ch;
-      if (rp > 0.22) {
-        ch = rippleGlyph[k];
-        r += rp * 120;
-        g += rp * 150;
-        b += rp * 160;
-      } else ch = L > 0.62 ? "~" : L > 0.4 ? "-" : L > 0.2 ? "·" : dn > 0.8 && hash2(i, j) > 0.93 ? "." : " ";
+      const rp = rippleStrength[k], nt = causticNet[k], sh = koiShadow[k];
+      let r, g, b, ch;
+      if (koiDepth[k] >= 0) {
+        ch = koiGlyph[k];
+        r = koiR[k] + nt * 14;
+        g = koiG[k] + nt * 20;
+        b = koiB[k] + nt * 22;
+        if (rp > 0.35) {
+          ch = rippleGlyph[k];
+          r += rp * 90;
+          g += rp * 110;
+          b += rp * 120;
+        }
+      } else {
+        const L = nt * 0.9 * (1 - sh * 0.8);
+        r = 5 + dn * 6 + L * 45;
+        g = 16 + dn * 12 + L * 120;
+        b = 24 + dn * 14 + L * 130;
+        if (sh > 0) {
+          r *= 1 - sh * 0.55;
+          g *= 1 - sh * 0.55;
+          b *= 1 - sh * 0.55;
+        }
+        if (rp > 0.22) {
+          ch = rippleGlyph[k];
+          r += rp * 120;
+          g += rp * 150;
+          b += rp * 160;
+        } else ch = L > 0.62 ? "~" : L > 0.4 ? "-" : L > 0.2 ? "·" : dn > 0.8 && hash2(i, j) > 0.93 ? "." : " ";
+      }
       cellGlyph[k] = ch;
       cellR[k] = r;
       cellG[k] = g;
