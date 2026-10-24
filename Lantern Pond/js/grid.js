@@ -17,6 +17,7 @@ let SC;            // scale relative to a 14px font: sizes and speeds are multip
 
 // ---- per-cell layers (index = row * COLS + col), rebuilt every frame ----
 let cellGlyph, cellR, cellG, cellB;      // final character + colour
+let rippleStrength, rippleGlyph;         // strongest ripple ring in the cell + its character
 let causticNet;                          // the moving net of light on the water
 
 function resize() {
@@ -40,6 +41,8 @@ function resize() {
   cellR = new Float32Array(N);
   cellG = new Float32Array(N);
   cellB = new Float32Array(N);
+  rippleStrength = new Float32Array(N);
+  rippleGlyph = new Array(N);
   causticNet = new Float32Array(N);
 }
 

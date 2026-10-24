@@ -3,8 +3,10 @@
    ============================================================================= */
 
 function frame(now) {
-  t += Math.min(0.05, (now - lastFrame) / 1000); // capped so a background tab doesn't jump
+  const dt = Math.min(0.05, (now - lastFrame) / 1000); // capped so a background tab doesn't jump
   lastFrame = now;
+  t += dt;
+  update(dt);
   render();
   requestAnimationFrame(frame);
 }
