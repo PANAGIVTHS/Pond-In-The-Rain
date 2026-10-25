@@ -1,5 +1,5 @@
 /* =============================================================================
-   The koi: what a koi is and its colours.
+   The koi: what a koi is, its colours, and where it likes to swim.
    (How they move is in simulation.js, how they're drawn is in render.js.)
    ============================================================================= */
 
@@ -53,13 +53,44 @@ function makeFish(i) {
     seed: rnd(0, 50),       // makes its colour patches unique
     variety: VARIETIES[i % VARIETIES.length],
     depth: rnd(0.5, 1),     // 0 deep … 1 near the surface
+    home: [0.5, 0.5],       // its home patch, as fractions of the screen
     goalX: x, goalY: y, goalTimer: 0, // the spot it's swimming to, and how long before it gets bored
     fleeTimer: 0, fleeAngle: 0,
     wakeTimer: 0,
   };
 }
 
-/** places the koi (on start) */
+/** each koi wanders around its own home patch; patches are a loose grid so the pond fills evenly */
+function assignHomes() {
+  const n = fish.length, cols = Math.max(2, Math.round(Math.sqrt((n * W) / H))), rows = Math.ceil(n / cols);
+  const slots = [];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) slots.push([(c + 0.5) / cols, (r + 0.5) / rows]);
+  for (let i = slots.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [slots[i], slots[j]] = [slots[j], slots[i]];
+  }
+  fish.forEach((f, i) => (f.home = slots[i % slots.length]));
+}
+
+/** where a koi's home patch is right now: homes drift slowly */
+function homeXY(f) {
+  const x = W * clamp(f.home[0] + (noise(t * 0.015 + f.seed, 1) - 0.5) * 0.25, 0.08, 0.92);
+  const y = H * clamp(f.home[1] + (noise(t * 0.015 + f.seed, 9) - 0.5) * 0.25, 0.1, 0.9);
+  return [x, y];
+}
+
+/** places the koi in their home patches (on start) */
 function spawnKoi() {
   for (let i = 0; i < CONFIG.fishCount * (W < 640 ? 0.6 : 1); i++) fish.push(makeFish(i));
+  assignHomes();
+  for (const f of fish) {
+    const [x, y] = homeXY(f), a = rnd(0, 6.28);
+    f.heading = a;
+    f.goalX = x;
+    f.goalY = y;
+    f.nodes.forEach((n, k) => {
+      n.x = x - Math.cos(a) * f.segLen * k;
+      n.y = y - Math.sin(a) * f.segLen * k;
+    });
+  }
 }

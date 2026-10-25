@@ -32,7 +32,7 @@ function updateWeather(dt) {
 /* ---- koi behaviour ------------------------------------------------------------
    Each frame a koi:
    1. picks what it's swimming toward: its current wander spot
-   2. adds up steering: toward that goal and away from the walls
+   2. adds up steering: toward that goal, away from other koi and the walls
    3. turns toward that, never tighter than its body can follow, and swims;
       the body follows the path the head took
    ------------------------------------------------------------------------------ */
@@ -47,6 +47,7 @@ function updateKoi(f, dt) {
   const len = Math.hypot(steer.x, steer.y) || 1;
   steer.x /= len;
   steer.y /= len;
+  keepApart(f, h, steer);
   const m = 70 * SC; // walls
   if (h.x < m) steer.x += ((m - h.x) / m) * 2;
   if (h.x > W - m) steer.x -= ((h.x - W + m) / m) * 2;
@@ -104,10 +105,15 @@ function chooseGoal(f, h, dt) {
   return { x: f.goalX, y: f.goalY, urgency: 0 };
 }
 
-/** pick the next spot to swim to: mostly ahead (within ~65° of heading),
-    reflected off the walls rather than pinned against them */
+/** pick the next spot to swim to: mostly ahead (within ~65° of heading), pulled gently back
+    toward home, and reflected off the walls rather than pinned against them */
 function nextWanderSpot(f, h) {
-  const angle = f.heading + rnd(-1.15, 1.15), dist = rnd(160, 320) * SC;
+  if (Math.random() < 0.04) {
+    // a rare long trip: swap homes with another koi
+    const o = fish[(Math.random() * fish.length) | 0];
+    if (o !== f) [f.home, o.home] = [o.home, f.home];
+  }
+  const [homeX, homeY] = homeXY(f), angle = f.heading + rnd(-1.15, 1.15), dist = rnd(160, 320) * SC;
   const mx = 120 * SC, my = 110 * SC; // margins
   const reflect = (v, lo, hi) => {
     if (hi <= lo) return (lo + hi) / 2;
@@ -117,6 +123,36 @@ function nextWanderSpot(f, h) {
     }
     return clamp(v, lo, hi);
   };
-  f.goalX = reflect(h.x + Math.cos(angle) * dist, mx, W - mx);
-  f.goalY = reflect(h.y + Math.sin(angle) * dist, my, H - my);
+  const pull = clamp(Math.hypot(homeX - h.x, homeY - h.y) / (Math.min(W, H) * 0.45), 0.15, 0.75);
+  const ax = reflect(h.x + Math.cos(angle) * dist, mx, W - mx), ay = reflect(h.y + Math.sin(angle) * dist, my, H - my);
+  f.goalX = reflect(lerp(ax, homeX, pull), mx, W - mx);
+  f.goalY = reflect(lerp(ay, homeY, pull), my, H - my);
+}
+
+/** keep clear of other koi: their whole body, both where this koi's head is and where it's about to be,
+    plus a wider berth between heads */
+function keepApart(f, h, steer) {
+  const aheadX = h.x + Math.cos(f.heading) * f.radius * 2, aheadY = h.y + Math.sin(f.heading) * f.radius * 2;
+  const probes = [[h.x, h.y, 1.8], [aheadX, aheadY, 1.3]]; // [x, y, strength]
+  for (const o of fish) {
+    if (o === f) continue;
+    const range = (f.radius + o.radius) * 1.7;
+    for (let q = 1; q < o.nodes.length; q += 2) {
+      const on = o.nodes[q];
+      for (const [px, py, k] of probes) {
+        const ex = px - on.x, ey = py - on.y, d = Math.hypot(ex, ey);
+        if (d < range && d > 0.1) {
+          const w = (1 - d / range) * k;
+          steer.x += (ex / d) * w;
+          steer.y += (ey / d) * w;
+        }
+      }
+    }
+    const oh = o.nodes[0], ex = h.x - oh.x, ey = h.y - oh.y, d = Math.hypot(ex, ey), headRange = 150 * SC;
+    if (d < headRange && d > 0.1) {
+      const w = (1 - d / headRange) * 2.2;
+      steer.x += (ex / d) * w;
+      steer.y += (ey / d) * w;
+    }
+  }
 }
