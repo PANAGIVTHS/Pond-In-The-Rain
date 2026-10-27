@@ -72,10 +72,18 @@ function assignHomes() {
   fish.forEach((f, i) => (f.home = slots[i % slots.length]));
 }
 
-/** where a koi's home patch is right now: homes drift slowly */
+/** where a koi's home patch is right now: homes drift slowly, and one under the name is moved just outside it */
 function homeXY(f) {
-  const x = W * clamp(f.home[0] + (noise(t * 0.015 + f.seed, 1) - 0.5) * 0.25, 0.08, 0.92);
-  const y = H * clamp(f.home[1] + (noise(t * 0.015 + f.seed, 9) - 0.5) * 0.25, 0.1, 0.9);
+  let x = W * clamp(f.home[0] + (noise(t * 0.015 + f.seed, 1) - 0.5) * 0.25, 0.08, 0.92);
+  let y = H * clamp(f.home[1] + (noise(t * 0.015 + f.seed, 9) - 0.5) * 0.25, 0.1, 0.9);
+  if (titleVisible())
+    for (const b of titleBoxes) {
+      const a = boxAway(b, x, y);
+      if (a.d < f.radius * 2) {
+        if (a.ux) x = a.ux < 0 ? b.x0 - f.radius * 3 : b.x1 + f.radius * 3;
+        else y = a.uy < 0 ? Math.max(H * 0.06, b.y0 - f.radius * 3) : b.y1 + f.radius * 3;
+      }
+    }
   return [x, y];
 }
 

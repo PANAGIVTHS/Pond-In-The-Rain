@@ -32,7 +32,8 @@ function updateWeather(dt) {
 /* ---- koi behaviour ------------------------------------------------------------
    Each frame a koi:
    1. picks what it's swimming toward: its current wander spot
-   2. adds up steering: toward that goal, away from other koi and the walls
+   2. adds up steering: toward that goal, away from other koi,
+      the name and the walls
    3. turns toward that, never tighter than its body can follow, and swims;
       the body follows the path the head took
    ------------------------------------------------------------------------------ */
@@ -48,6 +49,7 @@ function updateKoi(f, dt) {
   steer.x /= len;
   steer.y /= len;
   keepApart(f, h, steer);
+  if (titleVisible()) avoidTitle(f, h, steer);
   const m = 70 * SC; // walls
   if (h.x < m) steer.x += ((m - h.x) / m) * 2;
   if (h.x > W - m) steer.x -= ((h.x - W + m) / m) * 2;
@@ -127,6 +129,15 @@ function nextWanderSpot(f, h) {
   const ax = reflect(h.x + Math.cos(angle) * dist, mx, W - mx), ay = reflect(h.y + Math.sin(angle) * dist, my, H - my);
   f.goalX = reflect(lerp(ax, homeX, pull), mx, W - mx);
   f.goalY = reflect(lerp(ay, homeY, pull), my, H - my);
+  // never a spot under the name: push it out past the box edge
+  if (titleVisible())
+    for (const b of titleBoxes) {
+      const a = boxAway(b, f.goalX, f.goalY);
+      if (a.d < f.radius) {
+        if (a.ux) f.goalX = a.ux < 0 ? b.x0 - f.radius * 2 : b.x1 + f.radius * 2;
+        else f.goalY = a.uy < 0 ? b.y0 - f.radius * 2 : b.y1 + f.radius * 2;
+      }
+    }
 }
 
 /** keep clear of other koi: their whole body, both where this koi's head is and where it's about to be,
@@ -153,6 +164,21 @@ function keepApart(f, h, steer) {
       const w = (1 - d / headRange) * 2.2;
       steer.x += (ex / d) * w;
       steer.y += (ey / d) * w;
+    }
+  }
+}
+
+/** stay out from under the name: checked where it is and where it's heading */
+function avoidTitle(f, h, steer) {
+  for (const b of titleBoxes) {
+    const aheadX = h.x + Math.cos(f.heading) * f.radius * 2.4, aheadY = h.y + Math.sin(f.heading) * f.radius * 2.4;
+    for (const [px, py, k] of [[h.x, h.y, 1], [aheadX, aheadY, 0.8]]) {
+      const a = boxAway(b, px, py), margin = f.radius * 1.8;
+      if (a.d < margin) {
+        const w = (a.d === 0 ? 4 : (1 - a.d / margin) * 2.8) * k;
+        steer.x += a.ux * w;
+        steer.y += a.uy * w;
+      }
     }
   }
 }

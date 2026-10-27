@@ -21,6 +21,8 @@ let rippleStrength, rippleGlyph;         // strongest ripple ring in the cell + 
 let koiShadow;                           // koi shadow on the floor / dark rim around a body
 let causticNet;                          // the moving net of light on the water
 let koiDepth, koiGlyph, koiR, koiG, koiB; // koi layer (depth -1 = no koi here)
+let titleGlyph, titleAlpha;              // the name (only rebuilt on resize)
+let titleBoxes = [];                     // tight boxes around each line of the name: the koi keep out
 
 function resize() {
   const DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -52,6 +54,8 @@ function resize() {
   koiR = new Float32Array(N);
   koiG = new Float32Array(N);
   koiB = new Float32Array(N);
+
+  buildTitle();
 }
 
 /** cell index of a point in px, or -1 if it's off the grid */

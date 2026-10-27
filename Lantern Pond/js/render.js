@@ -3,7 +3,7 @@
    1. light layers: the caustic net and ripple rings
    2. koi, deepest first, into the koi layer
    3. composite: every cell becomes koi or water, plus ripples and light
-   4. things on the surface: rain
+   4. things on the surface: the name, rain
    5. paint: one character per cell onto the canvas
    ============================================================================= */
 
@@ -25,6 +25,7 @@ function render() {
   for (const f of fish) stampKoi(f);
   composite(aspect);
 
+  drawTitle();
   drawSurfaceBits();
   paint();
 }
@@ -252,6 +253,27 @@ function composite(aspect) {
       cellG[k] = g;
       cellB[k] = b;
     }
+  }
+}
+
+/** the name, tinted by koi passing beneath; fades out as you scroll */
+function drawTitle() {
+  const fade = clamp(1 - scrollY / (H * 0.55), 0, 1);
+  if (fade <= 0.01) return;
+  for (let k = 0; k < N; k++) {
+    const c = titleGlyph[k];
+    if (!c) continue;
+    const a = titleAlpha[k] * fade;
+    let r = 212, g = 218, b = 206;
+    if (koiDepth[k] >= 0) {
+      r = lerp(r, koiR[k] * 1.25, 0.6);
+      g = lerp(g, koiG[k] * 1.25, 0.6);
+      b = lerp(b, koiB[k] * 1.25, 0.6);
+    }
+    cellGlyph[k] = c;
+    cellR[k] = lerp(cellR[k], r, a);
+    cellG[k] = lerp(cellG[k], g, a);
+    cellB[k] = lerp(cellB[k], b, a);
   }
 }
 
