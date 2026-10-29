@@ -1,5 +1,5 @@
 /* =============================================================================
-   The name on the water.
+   The name on the water, and the lily pads.
    The name is drawn once (on resize) onto a hidden canvas, then each cell is
    sampled to see how much of it the letters cover; coverage picks a character.
    ============================================================================= */
@@ -128,4 +128,19 @@ function boxAway(b, x, y) {
   // inside: leave by the nearest side
   const l = x - b.x0, r = b.x1 - x, t = y - b.y0, bt = b.y1 - y, m = Math.min(l, r, t, bt);
   return { d: 0, ux: m === l ? -1 : m === r ? 1 : 0, uy: m === t ? -1 : m === bt ? 1 : 0 };
+}
+
+// ---- lily pads -------------------------------------------------------------
+let pads = [];
+function placePads() {
+  // x, y (fractions of the screen), radius, has a flower
+  const spots = [[0.09, 0.8, 62, 1], [0.9, 0.72, 54, 0], [0.14, 0.16, 44, 0], [0.85, 0.17, 50, 1], [0.6, 0.9, 40, 0], [0.38, 0.62, 30, 0]];
+  pads = spots.map(([x, y, r, flower]) => ({
+    x: x * W,
+    y: y * H,
+    radius: r * SC * (W < 640 ? 0.8 : 1),
+    notch: rnd(0, 6.28),
+    flower,
+    bobPhase: rnd(0, 6),
+  }));
 }

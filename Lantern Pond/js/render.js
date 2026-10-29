@@ -3,7 +3,7 @@
    1. light layers: the caustic net and ripple rings
    2. koi, deepest first, into the koi layer
    3. composite: every cell becomes koi or water, plus ripples and light
-   4. things on the surface: the name, rain
+   4. things on the surface: lily pads, the name, rain
    5. paint: one character per cell onto the canvas
    ============================================================================= */
 
@@ -25,6 +25,7 @@ function render() {
   for (const f of fish) stampKoi(f);
   composite(aspect);
 
+  drawPads();
   drawTitle();
   drawSurfaceBits();
   paint();
@@ -253,6 +254,35 @@ function composite(aspect) {
       cellG[k] = g;
       cellB[k] = b;
     }
+  }
+}
+
+/** lily pads (above the koi): radial veins, a notch, the odd flower */
+function drawPads() {
+  for (const p of pads) {
+    const R = p.radius, px0 = p.x, py0 = p.y + Math.sin(t * 0.5 + p.bobPhase) * 1.5;
+    const { i0, i1, j0, j1 } = cellRange(px0, py0, R);
+    for (let j = j0; j <= j1; j++)
+      for (let i = i0; i <= i1; i++) {
+        const dx = (i + 0.5) * CW - px0, dy = (j + 0.5) * CH - py0, d = Math.hypot(dx, dy);
+        if (d > R) continue;
+        const a = Math.atan2(dy, dx);
+        if (Math.abs(wrapAngle(a - p.notch)) < 0.28 && d > R * 0.12) continue;
+        const k = j * COLS + i, e = d / R, v = noise(i * 0.4, j * 0.4), s = (0.55 + 0.45 * (1 - e)) * (0.8 + 0.3 * v);
+        let ch = e > 0.86 ? (v > 0.5 ? "@" : "%") : e < 0.15 ? "o" : lineGlyph(a);
+        let r = 48 * s, g = 118 * s, b = 62 * s;
+        if (p.flower && d < R * 0.3) {
+          const fd = d / (R * 0.3);
+          ch = fd < 0.35 ? "*" : (i + j) & 1 ? "✿" : "❀";
+          r = 236 - fd * 40;
+          g = 150 - fd * 30;
+          b = 170 - fd * 20;
+        }
+        cellGlyph[k] = ch;
+        cellR[k] = r;
+        cellG[k] = g;
+        cellB[k] = b;
+      }
   }
 }
 

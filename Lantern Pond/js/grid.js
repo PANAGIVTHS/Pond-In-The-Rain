@@ -56,6 +56,7 @@ function resize() {
   koiB = new Float32Array(N);
 
   buildTitle();
+  placePads();
 }
 
 /** cell index of a point in px, or -1 if it's off the grid */
