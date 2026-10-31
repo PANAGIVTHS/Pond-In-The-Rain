@@ -1,6 +1,7 @@
 /* =============================================================================
    Input: the water.
-   On the water: move = a small wake, click = a ripple that scares koi.
+   On the water: move = a small wake, click = a ripple that scares koi,
+   right-click / long-press = food.
    ============================================================================= */
 
 /** koi within radius of (x, y) dart away for `time` seconds */
@@ -14,6 +15,17 @@ function scare(x, y, radius, time) {
   }
 }
 
+/** scatters six food pellets, each landing with a small ripple */
+function feed(x, y) {
+  for (let n = 0; n < 6; n++) {
+    const px = x + rnd(-34, 34) * SC, py = y + rnd(-22, 22) * SC;
+    pellets.push({ x: px, y: py, life: 14 });
+    setTimeout(() => {
+      addRipple(px, py, 16 * SC, 0.55, 30);
+    }, n * 45);
+  }
+}
+
 /** a click on the water */
 function poke(x, y) {
   addRipple(x, y, 150 * SC, 1.25, 70);
@@ -22,6 +34,7 @@ function poke(x, y) {
 }
 
 // ---- the water itself
+canvas.addEventListener("contextmenu", e => e.preventDefault());
 canvas.addEventListener("pointermove", e => {
   pointer.x = e.clientX;
   pointer.y = e.clientY;
@@ -32,7 +45,30 @@ canvas.addEventListener("pointermove", e => {
     w.t = t;
     addRipple(pointer.x, pointer.y, 24 * SC, 0.38, 34);
   }
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+  }
 });
 canvas.addEventListener("pointerdown", e => {
-  poke(e.clientX, e.clientY);
+  const x = e.clientX, y = e.clientY;
+  if (e.button === 2) {
+    feed(x, y);
+    return;
+  }
+  if (e.pointerType === "touch") {
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      feed(x, y);
+    }, 420);
+    return;
+  }
+  poke(x, y);
+});
+canvas.addEventListener("pointerup", e => {
+  if (pressTimer) {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+    poke(e.clientX, e.clientY);
+  }
 });

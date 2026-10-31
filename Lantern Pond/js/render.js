@@ -3,7 +3,7 @@
    1. light layers: the caustic net and ripple rings
    2. koi, deepest first, into the koi layer
    3. composite: every cell becomes koi or water, plus ripples and light
-   4. things on the surface: lily pads, the name, rain
+   4. things on the surface: lily pads, the name, rain, food
    5. paint: one character per cell onto the canvas
    ============================================================================= */
 
@@ -307,7 +307,7 @@ function drawTitle() {
   }
 }
 
-/** rain streaks */
+/** rain streaks and food pellets */
 function drawSurfaceBits() {
   for (const s of streaks) {
     const k = cellAt(s.x, s.y);
@@ -318,6 +318,15 @@ function drawSurfaceBits() {
       cellG[k] += 58;
       cellB[k] += 66;
     }
+  }
+  for (const p of pellets) {
+    const k = cellAt(p.x, p.y);
+    if (k < 0) continue;
+    const a = Math.min(1, p.life / 3);
+    cellGlyph[k] = "•";
+    cellR[k] = lerp(cellR[k], 196, a);
+    cellG[k] = lerp(cellG[k], 142, a);
+    cellB[k] = lerp(cellB[k], 86, a);
   }
 }
 

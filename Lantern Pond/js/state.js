@@ -9,8 +9,10 @@ let rainAcc = 0;            // fractional raindrops carried to the next frame
 
 
 const pointer = { x: -999, y: -999, lastWake: { x: 0, y: 0, t: 0 } };
+let pressTimer = null;      // long-press to feed on touch screens
 
 let ripples = [];           // { x, y, r, max, strength, speed } expanding rings
+let pellets = [];           // food
 let streaks = [];           // rain streaks
 
 /** starts a ripple ring; delay (s) holds it back so rings can follow each other */

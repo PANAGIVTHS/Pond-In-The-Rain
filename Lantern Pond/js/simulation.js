@@ -4,6 +4,8 @@
 
 function update(dt) {
   updateWeather(dt);
+  for (const p of pellets) p.life -= dt;
+  pellets = pellets.filter(p => p.life > 0);
   for (const f of fish) updateKoi(f, dt);
 }
 
@@ -31,7 +33,7 @@ function updateWeather(dt) {
 
 /* ---- koi behaviour ------------------------------------------------------------
    Each frame a koi:
-   1. picks what it's swimming toward: its current wander spot
+   1. picks what it's swimming toward: food, or its current wander spot
    2. adds up steering: toward that goal, away from other koi,
       the name and the walls
    3. turns toward that, never tighter than its body can follow, and swims;
@@ -41,7 +43,15 @@ function updateWeather(dt) {
 function updateKoi(f, dt) {
   const h = f.nodes[0];
 
-  const goal = chooseGoal(f, h, dt);
+  let food = null, foodDist = 420 * SC; // nearest food it can sense
+  for (const p of pellets) {
+    const d = Math.hypot(p.x - h.x, p.y - h.y);
+    if (d < foodDist) {
+      foodDist = d;
+      food = p;
+    }
+  }
+  const goal = chooseGoal(f, h, food, foodDist, dt);
 
   // steering: a direction built up from several pulls
   const steer = { x: goal.x - h.x, y: goal.y - h.y };
@@ -49,7 +59,7 @@ function updateKoi(f, dt) {
   steer.x /= len;
   steer.y /= len;
   keepApart(f, h, steer);
-  if (titleVisible()) avoidTitle(f, h, steer);
+  if (titleVisible() && !food) avoidTitle(f, h, steer);
   const m = 70 * SC; // walls
   if (h.x < m) steer.x += ((m - h.x) / m) * 2;
   if (h.x > W - m) steer.x -= ((h.x - W + m) / m) * 2;
@@ -95,7 +105,15 @@ function swim(f, h, steer, urgency, dt) {
 }
 
 /** what the koi is heading for this frame: { x, y, urgency } */
-function chooseGoal(f, h, dt) {
+function chooseGoal(f, h, food, foodDist, dt) {
+  // food: race for it, and eat it on arrival
+  if (food) {
+    if (foodDist < 11 * SC) {
+      food.life = 0;
+      addRipple(food.x, food.y, 26 * SC, 0.7, 40);
+    }
+    return { x: food.x, y: food.y, urgency: 1 };
+  }
   // wandering: a new spot when it arrives, gets bored, or the spot is inside its turning circle
   f.goalTimer -= dt;
   const gd = Math.hypot(f.goalX - h.x, f.goalY - h.y);
