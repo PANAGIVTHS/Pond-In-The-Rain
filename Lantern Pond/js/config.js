@@ -1,6 +1,7 @@
 /* =============================================================================
    Lantern Pond: settings
-   The things you're most likely to want to change live here.
+   The things you're most likely to want to change live here. The page text
+   (about, projects, contact…) is in index.html.
    ============================================================================= */
 
 const CONFIG = {

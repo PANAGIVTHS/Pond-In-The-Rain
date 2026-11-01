@@ -17,13 +17,13 @@ function render() {
   rippleStrength.fill(0);
   koiShadow.fill(0);
   koiDepth.fill(-1);
-  const aspect = CH / CW;
+  const aspect = CH / CW, scrollRows = scrollPix / CH;
 
-  drawCaustics(aspect);
+  drawCaustics(aspect, scrollRows);
   drawRipples();
   fish.sort((a, b) => a.depth - b.depth); // deep koi first
   for (const f of fish) stampKoi(f);
-  composite(aspect);
+  composite(aspect, scrollRows);
 
   drawPads();
   drawTitle();
@@ -32,9 +32,9 @@ function render() {
 }
 
 /** the moving net of light on the water: bright where two drifting noise fields meet */
-function drawCaustics(aspect) {
+function drawCaustics(aspect, scrollRows) {
   for (let j = 0; j < ROWS; j++) {
-    const y = j * aspect * 0.085;
+    const y = (j + scrollRows) * aspect * 0.085;
     for (let i = 0; i < COLS; i++) {
       const x = i * 0.085;
       const n1 = noise(x * 0.9 + t * 0.085, y * 1.25 + t * 0.03) + 0.5 * noise(x * 2.1 - t * 0.05, y * 2.4 + t * 0.04);
@@ -213,9 +213,9 @@ function stampKoi(f) {
 }
 
 /** every cell becomes koi or water, with ripples and light */
-function composite(aspect) {
+function composite(aspect, scrollRows) {
   for (let j = 0; j < ROWS; j++) {
-    const y = j * aspect;
+    const y = (j + scrollRows) * aspect;
     for (let i = 0; i < COLS; i++) {
       const k = j * COLS + i;
       const dn = noise(i * 0.03 + t * 0.01, y * 0.03); // slow dark/light variation of the water

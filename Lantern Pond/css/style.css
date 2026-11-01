@@ -21,8 +21,230 @@ canvas {
   touch-action: pan-y;
   z-index: 0;
 }
+#shade {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: #02070a;
+  opacity: 0;
+  z-index: 1;
+}
 
-/* ---- vignette ---- */
+/* ---- the page over the pond (only cards, links and inputs catch the pointer) ---- */
+#page {
+  position: relative;
+  z-index: 3;
+  pointer-events: none;
+}
+#page .glass,
+#page a,
+#page button,
+#page input,
+#page textarea,
+#page label {
+  pointer-events: auto;
+}
+.hero {
+  height: 100vh;
+  position: relative;
+}
+.scrollcue {
+  position: absolute;
+  left: 50%;
+  bottom: 34px;
+  transform: translateX(-50%);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  color: rgba(200, 215, 210, 0.5);
+  text-align: center;
+  animation: bob 3s ease-in-out infinite;
+}
+@keyframes bob {
+  50% {
+    transform: translate(-50%, 6px);
+  }
+}
+.wrap {
+  width: min(760px, 90vw);
+  margin: 0 auto;
+  padding-bottom: 22vh;
+}
+section {
+  padding-top: 16vh;
+}
+.shead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 22px;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  color: rgba(220, 200, 165, 0.75);
+  text-transform: lowercase;
+}
+.shead .kj {
+  font-family: "Noto Serif JP", serif;
+  font-size: 20px;
+  letter-spacing: 0;
+  color: #f0d6ac;
+  text-shadow: 0 0 14px rgba(255, 160, 70, 0.6);
+}
+.shead:after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(220, 200, 165, 0.35), transparent);
+}
+
+/* ---- frosted-glass cards ---- */
+.glass {
+  position: relative;
+  background: rgba(5, 15, 21, 0.46);
+  border: 1px solid rgba(190, 215, 210, 0.13);
+  backdrop-filter: blur(7px) saturate(1.15);
+  -webkit-backdrop-filter: blur(7px) saturate(1.15);
+  padding: 28px 30px;
+  transition:
+    border-color 0.7s ease,
+    box-shadow 0.7s ease;
+  overflow: hidden;
+}
+.glass h2 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(30px, 5vw, 44px);
+  margin: 0 0 14px;
+  color: #efe6d4;
+  line-height: 1.05;
+}
+.glass h3 {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 27px;
+  margin: 4px 0 10px;
+  color: #efe6d4;
+}
+.glass p {
+  font-size: 13px;
+  line-height: 1.85;
+  color: #b9c7c2;
+  margin: 0 0 12px;
+}
+.glass p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---- text ---- */
+.em {
+  color: #f0cf9e;
+}
+
+/* ---- selected work ---- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 18px;
+}
+.proj {
+  cursor: default;
+}
+.proj .hk {
+  position: absolute;
+  top: 22px;
+  right: 24px;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid rgba(214, 90, 60, 0.75);
+  color: rgba(230, 110, 80, 0.9);
+  font-family: "Noto Serif JP", serif;
+  font-size: 19px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: rotate(4deg);
+}
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  color: #c99a62;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0 16px;
+}
+.chips span {
+  font-size: 10.5px;
+  border: 1px solid rgba(190, 215, 210, 0.2);
+  padding: 3px 8px;
+  color: #a9bbb6;
+}
+.lnk {
+  color: #e9d7b8;
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(214, 90, 60, 0.8);
+  padding-bottom: 2px;
+  margin-right: 16px;
+}
+.lnk:hover {
+  color: #ffb98a;
+}
+
+/* ---- tools ---- */
+.cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px;
+}
+.cols ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 2.1;
+  color: #b9c7c2;
+}
+.cols li:before {
+  content: "~ ";
+  color: rgba(110, 190, 200, 0.6);
+}
+
+/* ---- footer ---- */
+footer {
+  text-align: center;
+  font-size: 10.5px;
+  letter-spacing: 0.25em;
+  color: rgba(200, 215, 210, 0.35);
+  padding: 10vh 0 6vh;
+}
+
+/* ---- fixed: the name in the corner, the vignette ---- */
+#nav {
+  position: fixed;
+  top: 16px;
+  left: 18px;
+  z-index: 5;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-size: 20px;
+  color: #e9dfcc;
+  opacity: 0;
+  transition: opacity 0.8s;
+  text-decoration: none;
+}
+#nav.on {
+  opacity: 0.85;
+}
+@media (prefers-reduced-motion: reduce) {
+  .scrollcue {
+    animation: none;
+  }
+}
 .vignette {
   position: fixed;
   inset: 0;

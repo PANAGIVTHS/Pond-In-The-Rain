@@ -66,11 +66,23 @@ function updateKoi(f, dt) {
   if (h.y < m) steer.y += ((m - h.y) / m) * 2;
   if (h.y > H - m) steer.y -= ((h.y - H + m) / m) * 2;
 
-  swim(f, h, steer, goal.urgency, dt);
+  // left behind by scrolling: hurry straight back into view
+  const offscreen = h.x < -20 || h.x > W + 20 || h.y < -20 || h.y > H + 20;
+  if (offscreen) {
+    if (f.goalY < 0 || f.goalY > H || f.goalX < 0 || f.goalX > W) {
+      [f.goalX, f.goalY] = homeXY(f);
+      f.goalTimer = rnd(4, 8);
+    }
+    const bx = f.goalX - h.x, by = f.goalY - h.y, bl = Math.hypot(bx, by) || 1;
+    steer.x = bx / bl;
+    steer.y = by / bl;
+  }
+
+  swim(f, h, steer, goal.urgency, offscreen, dt);
 }
 
 /** turn toward the steering direction (limited by the body) and move; the body follows the head */
-function swim(f, h, steer, urgency, dt) {
+function swim(f, h, steer, urgency, offscreen, dt) {
   let want = Math.atan2(steer.y, steer.x);
   if (f.fleeTimer > 0) {
     want = f.fleeAngle;
@@ -80,11 +92,11 @@ function swim(f, h, steer, urgency, dt) {
   const fleeing = f.fleeTimer > 0;
   // the tightest circle the body can follow without overlapping itself
   const minTurnRadius = ((f.segLen * (f.nodes.length - 1)) / (2 * Math.PI)) * (fleeing ? 2.1 : 2.0);
-  const maxTurn = Math.min(fleeing ? 4 : urgency ? 2.6 : 1.9, f.speed / minTurnRadius) * dt;
+  const maxTurn = Math.min(fleeing ? 4 : offscreen ? 3 : urgency ? 2.6 : 1.9, f.speed / minTurnRadius) * dt;
   f.heading += clamp(da, -maxTurn, maxTurn);
 
   const targetSpeed =
-    f.cruise * (1 + urgency * 1.5) * (Math.abs(da) > 1.6 && !fleeing ? 1.15 : 1) + (fleeing ? 110 * SC : 0);
+    f.cruise * (1 + urgency * 1.5) * (offscreen ? 3.2 : 1) * (Math.abs(da) > 1.6 && !fleeing ? 1.15 : 1) + (fleeing ? 110 * SC : 0);
   f.speed = lerp(f.speed, targetSpeed, 1 - Math.exp(-dt * (fleeing ? 6 : 1.5)));
   f.tailPhase += dt * (1.2 + (f.speed * 0.055) / SC); // tail beat follows speed
   const moveAngle = f.heading + Math.sin(f.tailPhase) * 0.18; // a slight side-to-side

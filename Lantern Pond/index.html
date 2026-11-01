@@ -11,6 +11,67 @@
 <body>
 <canvas id="c"></canvas>
 <div class="vignette"></div>
+<div id="shade"></div>
+<a id="nav" href="#top">Panagiotis Tsogkas</a>
+
+<!-- ============================ PAGE CONTENT: edit me ============================
+     Each <section> is a part of the page; its id is what the links point to.
+     ================================================================================== -->
+<main id="page">
+  <div class="hero" id="top"><div class="scrollcue">scroll<br>↓</div></div>
+  <div class="wrap">
+
+    <section id="about">
+      <div class="shead"><span class="kj">私</span>about</div>
+      <div class="glass">
+        <h2>Hi, I make small machines and quiet worlds.</h2>
+        <p>I'm a <span class="em">hardware / software</span> person who likes knowing how things work all the way down: from the transistor to the pixel. I design boards, write HDL, build tools, and make games with slow, rainy atmospheres.</p>
+        <p>Outside of that: anime, synths, late-night soldering, and listening to rain. This pond is what my head sounds like. (Placeholder text: rewrite it in your own voice.)</p>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="shead"><span class="kj">作</span>selected work</div>
+      <div class="grid">
+        <article class="glass proj"><div class="hk">機</div><div class="tag">HARDWARE</div><h3>RISC-V Soft Core</h3>
+          <p>A five-stage pipelined RV32I core written from scratch, running on a cheap FPGA board. Boots a tiny monitor over UART.</p>
+          <div class="chips"><span>SystemVerilog</span><span>FPGA</span><span>Verilator</span></div>
+          <a class="lnk" href="#">code →</a><a class="lnk" href="#">write-up →</a></article>
+        <article class="glass proj"><div class="hk">遊</div><div class="tag">GAME</div><h3>Lantern Drift</h3>
+          <p>A slow, rainy puzzle game about guiding paper lanterns down a river at night.</p>
+          <div class="chips"><span>Godot</span><span>GDScript</span><span>FMOD</span></div>
+          <a class="lnk" href="#">play →</a></article>
+        <article class="glass proj"><div class="hk">板</div><div class="tag">HARDWARE</div><h3>Macro Pad PCB</h3>
+          <p>A 12-key hot-swap macro pad with a rotary encoder and an RP2040, designed and routed in KiCad.</p>
+          <div class="chips"><span>KiCad</span><span>RP2040</span><span>QMK</span></div>
+          <a class="lnk" href="#">schematic →</a></article>
+        <article class="glass proj"><div class="hk">池</div><div class="tag">SOFTWARE</div><h3>This Pond</h3>
+          <p>The text-mode renderer behind this site: koi built from spine chains, caustics from drifting noise, procedural rain audio.</p>
+          <div class="chips"><span>JavaScript</span><span>Canvas</span><span>WebAudio</span></div>
+          <a class="lnk" href="#">code →</a></article>
+      </div>
+    </section>
+
+    <section id="tools">
+      <div class="shead"><span class="kj">道</span>tools of the trade</div>
+      <div class="glass"><div class="cols">
+        <div><div class="tag">HARDWARE</div><ul><li>KiCad · PCB layout</li><li>Verilog / SystemVerilog</li><li>FPGA toolchains</li><li>soldering & bring-up</li></ul></div>
+        <div><div class="tag">SOFTWARE</div><ul><li>C / C++ / Rust</li><li>Python · TypeScript</li><li>Linux & embedded</li><li>graphics & shaders</li></ul></div>
+        <div><div class="tag">GAMES</div><ul><li>Godot · Unity</li><li>pixel & ASCII art</li><li>sound design</li><li>quiet game feel</li></ul></div>
+      </div></div>
+    </section>
+
+    <section id="contact">
+      <div class="shead"><span class="kj">文</span>contact</div>
+      <div class="glass">
+        <h2>Say hello.</h2>
+        <p>Write to <span class="em">you@example.com</span>.</p>
+      </div>
+    </section>
+
+    <footer>雨の池 · made of text and rain</footer>
+  </div>
+</main>
 
 <!-- the pond: plain scripts, loaded in this order (later files use things from earlier ones) -->
 <script src="js/config.js"></script>
@@ -19,6 +80,7 @@
 <script src="js/title.js"></script>
 <script src="js/koi.js"></script>
 <script src="js/state.js"></script>
+<script src="js/page-link.js"></script>
 <script src="js/input.js"></script>
 <script src="js/simulation.js"></script>
 <script src="js/render.js"></script>
