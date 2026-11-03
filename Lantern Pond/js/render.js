@@ -1,9 +1,9 @@
 /* =============================================================================
    Rendering. Each frame, in order:
-   1. light layers: the caustic net and ripple rings
+   1. light layers: the caustic net, ripple rings, lantern glow
    2. koi, deepest first, into the koi layer
    3. composite: every cell becomes koi or water, plus ripples and light
-   4. things on the surface: lily pads, the name, rain, food
+   4. things on the surface: lily pads, the name, rain, food, lanterns
    5. paint: one character per cell onto the canvas
    ============================================================================= */
 
@@ -15,12 +15,14 @@ const LIGHT_DIR = (() => {    // light from the upper left
 
 function render() {
   rippleStrength.fill(0);
+  lanternGlow.fill(0);
   koiShadow.fill(0);
   koiDepth.fill(-1);
   const aspect = CH / CW, scrollRows = scrollPix / CH;
 
   drawCaustics(aspect, scrollRows);
   drawRipples();
+  drawLanternGlow();
   fish.sort((a, b) => a.depth - b.depth); // deep koi first
   for (const f of fish) stampKoi(f);
   composite(aspect, scrollRows);
@@ -28,7 +30,8 @@ function render() {
   drawPads();
   drawTitle();
   drawSurfaceBits();
-  paint();
+  const lanternSprites = drawLanterns();
+  paint(lanternSprites);
 }
 
 /** the moving net of light on the water: bright where two drifting noise fields meet */
@@ -62,6 +65,23 @@ function drawRipples() {
         if (s > rippleStrength[k]) {
           rippleStrength[k] = s;
           rippleGlyph[k] = rp.r < 5 * SC ? (rp.strength > 1 ? "o" : "°") : lineGlyph(Math.atan2(dy, dx) + Math.PI / 2);
+        }
+      }
+  }
+}
+
+/** warm lantern light on the water, flickering */
+function drawLanternGlow() {
+  for (const L of lanterns) {
+    const R = (130 + L.hover * 30) * SC * Math.max(1, L.intensity);
+    const flicker = 0.86 + 0.1 * Math.sin(L.phase * 7.3) + 0.06 * Math.sin(L.phase * 13.1);
+    const { i0, i1, j0, j1 } = cellRange(L.x, L.y, R);
+    for (let j = j0; j <= j1; j++)
+      for (let i = i0; i <= i1; i++) {
+        const d = Math.hypot((i + 0.5) * CW - L.x, (j + 0.5) * CH - L.y) / R;
+        if (d < 1) {
+          const q = 1 - d;
+          lanternGlow[j * COLS + i] += q * q * flicker * (0.8 + 0.35 * L.hover);
         }
       }
   }
@@ -219,13 +239,13 @@ function composite(aspect, scrollRows) {
     for (let i = 0; i < COLS; i++) {
       const k = j * COLS + i;
       const dn = noise(i * 0.03 + t * 0.01, y * 0.03); // slow dark/light variation of the water
-      const rp = rippleStrength[k], nt = causticNet[k], sh = koiShadow[k];
+      const gw = lanternGlow[k], rp = rippleStrength[k], nt = causticNet[k], sh = koiShadow[k];
       let r, g, b, ch;
       if (koiDepth[k] >= 0) {
         ch = koiGlyph[k];
-        r = koiR[k] + nt * 14;
-        g = koiG[k] + nt * 20;
-        b = koiB[k] + nt * 22;
+        r = koiR[k] + gw * 95 + nt * 14;
+        g = koiG[k] + gw * 60 + nt * 20;
+        b = koiB[k] + gw * 25 + nt * 22;
         if (rp > 0.35) {
           ch = rippleGlyph[k];
           r += rp * 90;
@@ -233,10 +253,10 @@ function composite(aspect, scrollRows) {
           b += rp * 120;
         }
       } else {
-        const L = nt * 0.9 * (1 - sh * 0.8);
-        r = 5 + dn * 6 + L * 45;
-        g = 16 + dn * 12 + L * 120;
-        b = 24 + dn * 14 + L * 130;
+        const L = nt * 0.9 * (1 - sh * 0.8) + gw * 0.35;
+        r = 5 + dn * 6 + L * 45 + gw * 120;
+        g = 16 + dn * 12 + L * 120 + gw * 72;
+        b = 24 + dn * 14 + L * 130 + gw * 30;
         if (sh > 0) {
           r *= 1 - sh * 0.55;
           g *= 1 - sh * 0.55;
@@ -268,9 +288,9 @@ function drawPads() {
         if (d > R) continue;
         const a = Math.atan2(dy, dx);
         if (Math.abs(wrapAngle(a - p.notch)) < 0.28 && d > R * 0.12) continue;
-        const k = j * COLS + i, e = d / R, v = noise(i * 0.4, j * 0.4), s = (0.55 + 0.45 * (1 - e)) * (0.8 + 0.3 * v);
+        const k = j * COLS + i, e = d / R, v = noise(i * 0.4, j * 0.4), s = (0.55 + 0.45 * (1 - e)) * (0.8 + 0.3 * v) + lanternGlow[k] * 0.5;
         let ch = e > 0.86 ? (v > 0.5 ? "@" : "%") : e < 0.15 ? "o" : lineGlyph(a);
-        let r = 48 * s, g = 118 * s, b = 62 * s;
+        let r = 48 * s + lanternGlow[k] * 60, g = 118 * s + lanternGlow[k] * 40, b = 62 * s;
         if (p.flower && d < R * 0.3) {
           const fd = d / (R * 0.3);
           ch = fd < 0.35 ? "*" : (i + j) & 1 ? "✿" : "❀";
@@ -301,8 +321,8 @@ function drawTitle() {
       b = lerp(b, koiB[k] * 1.25, 0.6);
     }
     cellGlyph[k] = c;
-    cellR[k] = lerp(cellR[k], r, a);
-    cellG[k] = lerp(cellG[k], g, a);
+    cellR[k] = lerp(cellR[k], r + lanternGlow[k] * 60, a);
+    cellG[k] = lerp(cellG[k], g + lanternGlow[k] * 40, a);
     cellB[k] = lerp(cellB[k], b, a);
   }
 }
@@ -330,10 +350,74 @@ function drawSurfaceBits() {
   }
 }
 
-/** puts it all on the canvas: the background, then one character per cell */
-function paint() {
+/** lanterns: a paper box, its reflection and a label in the grid; returns the glows and kanji
+    that are painted separately (on top, in a serif font) */
+function drawLanterns() {
+  const glows = [], kanji = [];
+  const box = ["╭─────╮", "│     │", "╰─────╯"];
+  for (const L of lanterns) {
+    const cx = Math.round(L.x / CW - 0.5), cy = Math.round(L.y / CH - 0.5);
+    const flicker = 0.85 + 0.1 * Math.sin(L.phase * 7.3) + 0.05 * Math.sin(L.phase * 17), hv = L.hover;
+    for (let rr = 0; rr < 3; rr++)
+      for (let cc = 0; cc < 7; cc++) {
+        const i = cx - 3 + cc, j = cy - 1 + rr;
+        if (i < 0 || i >= COLS || j < 0 || j >= ROWS) continue;
+        const k = j * COLS + i;
+        cellGlyph[k] = box[rr][cc];
+        cellR[k] = (232 + hv * 20) * flicker;
+        cellG[k] = (186 + hv * 30) * flicker;
+        cellB[k] = (128 + hv * 40) * flicker;
+      }
+    glows.push([(cx - 2) * CW, (cy - 1) * CH + CH * 0.5, 5 * CW, CH * 2, (0.22 + 0.12 * hv) * flicker * Math.min(1.6, L.intensity)]);
+    kanji.push([(cx + 0.5) * CW, (cy + 0.5) * CH, L.info.kanji, flicker, hv]);
+
+    // reflection: a wobbling column of ~ ≈ below it
+    for (let n = 2; n <= 5; n++) {
+      const j = cy + n;
+      if (j >= ROWS) break;
+      const w = Math.round(Math.sin(t * 2.2 + n * 1.3 + L.phase) * 0.9);
+      for (const o of [0, w]) {
+        const i = cx + o;
+        if (i < 0 || i >= COLS) continue;
+        const k = j * COLS + i, a = (1 - n / 6) * 0.55 * flicker;
+        cellGlyph[k] = n % 2 ? "~" : "≈";
+        cellR[k] = lerp(cellR[k], 230, a);
+        cellG[k] = lerp(cellG[k], 150, a);
+        cellB[k] = lerp(cellB[k], 70, a);
+      }
+    }
+
+    // label above a map lantern ("→ about"), brighter on hover
+    if (L.kind === "nav" && L.state === "float") {
+      const s = "→ " + L.info.label, row = cy - 2, start = Math.round(L.x / CW - s.length / 2), a = Math.max(hv, 0.28);
+      if (row >= 0 && row < ROWS)
+        for (let n = 0; n < s.length; n++) {
+          const i = start + n;
+          if (i < 0 || i >= COLS || s[n] === " ") continue;
+          const k = row * COLS + i;
+          cellGlyph[k] = s[n];
+          cellR[k] = lerp(cellR[k], 250, a);
+          cellG[k] = lerp(cellG[k], 226, a);
+          cellB[k] = lerp(cellB[k], 190, a);
+        }
+    }
+  }
+  return { glows, kanji };
+}
+
+/** puts it all on the canvas: background, lantern glows, the characters, then the kanji */
+function paint({ glows, kanji }) {
   ctx.fillStyle = "#040c11";
   ctx.fillRect(0, 0, W, H);
+  for (const [x, y, w, h, a] of glows) {
+    ctx.fillStyle = `rgba(255,150,60,${a})`;
+    ctx.fillRect(x, y, w, h);
+    const g = ctx.createRadialGradient(x + w / 2, y + h / 2, 2, x + w / 2, y + h / 2, w * 0.9);
+    g.addColorStop(0, `rgba(255,190,110,${a * 0.9})`);
+    g.addColorStop(1, "rgba(255,140,50,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(x - w * 0.4, y - h * 0.6, w * 1.8, h * 2.2);
+  }
 
   ctx.font = `${FS}px ${FONT}`;
   ctx.textBaseline = "middle";
@@ -352,4 +436,14 @@ function paint() {
       ctx.fillText(ch, i * CW, y);
     }
   }
+
+  ctx.textAlign = "center";
+  ctx.font = `600 ${Math.round(FS * 1.15)}px "Noto Serif JP",serif`;
+  for (const [x, y, kj, flicker, hv] of kanji) {
+    ctx.fillStyle = `rgba(255,${(232 + hv * 20) | 0},${(196 + hv * 40) | 0},${0.85 * flicker + 0.15})`;
+    ctx.shadowColor = "rgba(255,160,70,.9)";
+    ctx.shadowBlur = 10 + hv * 8;
+    ctx.fillText(kj, x, y + 1);
+  }
+  ctx.shadowBlur = 0;
 }

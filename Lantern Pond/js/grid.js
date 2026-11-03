@@ -18,6 +18,7 @@ let SC;            // scale relative to a 14px font: sizes and speeds are multip
 // ---- per-cell layers (index = row * COLS + col), rebuilt every frame ----
 let cellGlyph, cellR, cellG, cellB;      // final character + colour
 let rippleStrength, rippleGlyph;         // strongest ripple ring in the cell + its character
+let lanternGlow;                         // warm light from lanterns
 let koiShadow;                           // koi shadow on the floor / dark rim around a body
 let causticNet;                          // the moving net of light on the water
 let koiDepth, koiGlyph, koiR, koiG, koiB; // koi layer (depth -1 = no koi here)
@@ -47,6 +48,7 @@ function resize() {
   cellB = new Float32Array(N);
   rippleStrength = new Float32Array(N);
   rippleGlyph = new Array(N);
+  lanternGlow = new Float32Array(N);
   koiShadow = new Float32Array(N);
   causticNet = new Float32Array(N);
   koiDepth = new Float32Array(N);
@@ -57,6 +59,13 @@ function resize() {
 
   buildTitle();
   placePads();
+  // nav lanterns get new homes in the side margins
+  lanterns.forEach((L, i) => {
+    if (L.kind !== "nav") return;
+    [L.homeX, L.homeY] = lanternHome(i);
+    L.x = clamp(L.x, 40, W - 40);
+    L.y = clamp(L.y, 40, H - 40);
+  });
 }
 
 /** cell index of a point in px, or -1 if it's off the grid */

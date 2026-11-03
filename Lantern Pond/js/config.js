@@ -11,4 +11,12 @@ const CONFIG = {
   // how the name is drawn: "ascii" (classic density ramp) or "soft" (shaded blocks)
   titleStyle: "ascii",
   fishCount: 8,
+
+  // the lanterns are a floating map: clicking one glides to its section
+  lanterns: [
+    { kanji: "私", label: "about",   target: "about" },
+    { kanji: "作", label: "work",    target: "projects" },
+    { kanji: "道", label: "tools",   target: "tools" },
+    { kanji: "文", label: "contact", target: "contact" },
+  ],
 };

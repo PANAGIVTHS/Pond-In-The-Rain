@@ -1,5 +1,6 @@
 /* =============================================================================
-   The simulation, stepped once per frame: weather, then every koi.
+   The simulation, stepped once per frame: weather, then every koi
+   and lantern.
    ============================================================================= */
 
 function update(dt) {
@@ -7,6 +8,7 @@ function update(dt) {
   for (const p of pellets) p.life -= dt;
   pellets = pellets.filter(p => p.life > 0);
   for (const f of fish) updateKoi(f, dt);
+  updateLanterns(dt);
 }
 
 function updateWeather(dt) {
