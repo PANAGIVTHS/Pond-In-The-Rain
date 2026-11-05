@@ -3,10 +3,11 @@
    ============================================================================= */
 
 function frame(now) {
-  const dt = Math.min(0.05, (now - lastFrame) / 1000); // capped so a background tab doesn't jump
+  const realDt = Math.min(0.05, (now - lastFrame) / 1000); // capped so a background tab doesn't jump
+  const dt = still ? 0 : realDt;
   lastFrame = now;
   t += dt;
-  pageLink(dt);
+  pageLink(realDt); // the page keeps responding even while the pond is still
   update(dt);
   render();
   requestAnimationFrame(frame);

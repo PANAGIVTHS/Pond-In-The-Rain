@@ -13,6 +13,8 @@
 <div class="vignette"></div>
 <div id="shade"></div>
 <a id="nav" href="#top">Panagiotis Tsogkas</a>
+<div id="ui"><button id="bStill">◌ still</button><button id="bRain">☂ rain</button></div>
+<div id="hint">click the water · <b>right-click</b> or long-press to feed · <b>lanterns</b> are a map</div>
 
 <!-- ============================ PAGE CONTENT: edit me ============================
      Each <section> is a part of the page; its id is what the lanterns and links point to.
@@ -73,6 +75,12 @@
   </div>
 </main>
 
+<div id="intro">
+  <div class="k">雨の池</div>
+  <div class="s">a pond in the rain</div>
+  <div class="row"><button id="enterS">enter</button></div>
+</div>
+
 <!-- the pond: plain scripts, loaded in this order (later files use things from earlier ones) -->
 <script src="js/config.js"></script>
 <script src="js/util.js"></script>
@@ -81,6 +89,7 @@
 <script src="js/koi.js"></script>
 <script src="js/lanterns.js"></script>
 <script src="js/state.js"></script>
+<script src="js/controls.js"></script>
 <script src="js/page-link.js"></script>
 <script src="js/input.js"></script>
 <script src="js/simulation.js"></script>

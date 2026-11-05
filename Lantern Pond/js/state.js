@@ -2,7 +2,8 @@
    Shared state of the pond (everything else reads and updates these).
    ============================================================================= */
 
-let rainOn = true;
+let rainOn = true;          // the ☂ button
+let still = false;          // the ◌ button: freezes the simulation
 let t = 0;                  // simulation time in seconds (stops while still)
 let lastFrame = performance.now();
 let rainAcc = 0;            // fractional raindrops carried to the next frame

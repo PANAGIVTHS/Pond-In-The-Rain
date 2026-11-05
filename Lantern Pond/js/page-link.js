@@ -4,13 +4,12 @@
    ============================================================================= */
 
 
-const shadeEl = $("shade"), navEl = $("nav");
-
 function pageLink(dt) {
   scrollParallax();
 
   shadeEl.style.opacity = (clamp(scrollY / H, 0, 1) * 0.2).toFixed(3);
   navEl.classList.toggle("on", scrollY > H * 0.6);
+  hintEl.style.display = scrollY > H * 0.3 ? "none" : "";
 }
 
 /** the whole pond drifts at 35% of the scroll speed; fast scrolling stirs the water */

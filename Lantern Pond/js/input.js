@@ -38,7 +38,7 @@ function openLantern(L) {
   L.intensity = 2.6;
   addRipple(L.x, L.y, 90 * SC, 1, 55);
   const el = $(L.info.target);
-  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (el) el.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
 }
 
 // ---- the water itself
