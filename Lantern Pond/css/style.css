@@ -117,6 +117,10 @@ section {
     box-shadow 0.7s ease;
   overflow: hidden;
 }
+body.flash .glass {
+  border-color: rgba(220, 235, 255, 0.55);
+  transition: border-color 0.05s;
+}
 .glass h2 {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-style: italic;

@@ -23,5 +23,6 @@ const CONFIG = {
   // sound
   volume: 0.28,        // master volume (0–1)
   rainVolume: 0.1,     // rain, relative to the other sounds
+  thunderVolume: 0.18, // thunder (at its loudest about 3× the rain)
   bellVolume: 0.7,     // the lantern bell
 };

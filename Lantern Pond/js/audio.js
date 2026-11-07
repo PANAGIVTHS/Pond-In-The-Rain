@@ -1,6 +1,7 @@
 /* =============================================================================
    Sound: everything is synthesised live with Web Audio (no sound files).
-   Rain is filtered pink noise; drips, plops, ticks and the bell are oscillators.
+   Rain is filtered pink noise; drips, plops, ticks and the bell are oscillators;
+   thunder is the same noise shaped into a crack and a long roll.
    ============================================================================= */
 
 const audio = { ctx: null, on: false };
@@ -17,7 +18,7 @@ function initAudio() {
     audio.master.gain.value = 0;
     audio.master.connect(a.destination);
 
-    // 4 s of stereo pink noise (Paul Kellet's filter), used by the rain
+    // 4 s of stereo pink noise (Paul Kellet's filter), reused by the rain and the thunder
     const len = a.sampleRate * 4, buf = a.createBuffer(2, len, a.sampleRate);
     for (let c = 0; c < 2; c++) {
       const d = buf.getChannelData(c);
@@ -170,4 +171,37 @@ function tick(x) {
   pan(g, x).connect(audio.fx);
   o.start(t);
   o.stop(t + 0.06);
+}
+
+/** thunder arrives a moment after the flash: a crack, then a long rolling rumble */
+function thunder() {
+  if (!canPlay()) return;
+  const a = audio.ctx, t0 = a.currentTime + rnd(1.0, 2.4);
+
+  const crack = a.createBufferSource(), bp = a.createBiquadFilter(), crackGain = a.createGain();
+  crack.buffer = audio.noise;
+  crack.playbackRate.value = 0.8;
+  bp.type = "bandpass";
+  bp.frequency.value = 900;
+  bp.Q.value = 0.7;
+  crackGain.gain.setValueAtTime(0, t0);
+  crackGain.gain.linearRampToValueAtTime(0.9 * CONFIG.thunderVolume, t0 + 0.02);
+  crackGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.6);
+  crack.connect(bp).connect(crackGain).connect(audio.fx);
+  crack.start(t0, rnd(0, 3));
+  crack.stop(t0 + 0.7);
+
+  const roll = a.createBufferSource(), lp = a.createBiquadFilter(), rollGain = a.createGain();
+  roll.buffer = audio.noise;
+  roll.loop = true;
+  roll.playbackRate.value = 0.35;
+  lp.type = "lowpass";
+  lp.frequency.setValueAtTime(1600, t0);
+  lp.frequency.exponentialRampToValueAtTime(320, t0 + 4); // keeps the roll audible on small speakers
+  rollGain.gain.setValueAtTime(0, t0);
+  rollGain.gain.linearRampToValueAtTime(1.4 * CONFIG.thunderVolume, t0 + 0.25);
+  rollGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 5.5);
+  roll.connect(lp).connect(rollGain).connect(audio.fx);
+  roll.start(t0, rnd(0, 2));
+  roll.stop(t0 + 5.7);
 }

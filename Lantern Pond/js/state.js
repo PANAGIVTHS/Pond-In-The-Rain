@@ -7,6 +7,8 @@ let still = false;          // the ◌ button: freezes the simulation
 let t = 0;                  // simulation time in seconds (stops while still)
 let lastFrame = performance.now();
 let rainAcc = 0;            // fractional raindrops carried to the next frame
+let flash = 0;              // lightning brightness 0..1
+let nextFlash = rnd(25, 55); // seconds until the next lightning
 
 let lastScrollY = scrollY;
 let scrollPix = 0;          // how far the pond has drifted from scrolling (moves the light net with it)

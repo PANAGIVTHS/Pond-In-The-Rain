@@ -32,6 +32,22 @@ function updateWeather(dt) {
   streaks = streaks.filter(s => s.life > 0 && s.y < H);
   for (const r of ripples) r.r += r.speed * dt;
   ripples = ripples.filter(r => r.r < r.max);
+
+  // lightning: a double flicker (the card borders flash too), then thunder a moment later
+  nextFlash -= dt;
+  if (rainOn && nextFlash < 0) {
+    nextFlash = rnd(35, 80);
+    flash = 1;
+    setTimeout(() => (flash = 0.7), 140);
+    thunder();
+    const blink = ms => {
+      document.body.classList.add("flash");
+      setTimeout(() => document.body.classList.remove("flash"), ms);
+    };
+    blink(180);
+    setTimeout(() => blink(120), 300);
+  }
+  flash *= Math.exp(-dt * 5);
 }
 
 /* ---- koi behaviour ------------------------------------------------------------

@@ -2,7 +2,7 @@
    Rendering. Each frame, in order:
    1. light layers: the caustic net, ripple rings, lantern glow
    2. koi, deepest first, into the koi layer
-   3. composite: every cell becomes koi or water, plus ripples and light
+   3. composite: every cell becomes koi or water, plus ripples, light, mood, lightning
    4. things on the surface: lily pads, the name, rain, food, lanterns
    5. paint: one character per cell onto the canvas
    ============================================================================= */
@@ -232,8 +232,9 @@ function stampKoi(f) {
   }
 }
 
-/** every cell becomes koi or water, with ripples and light */
+/** every cell becomes koi or water, with ripples, light and lightning */
 function composite(aspect, scrollRows) {
+  const fl = flash * flash;
   for (let j = 0; j < ROWS; j++) {
     const y = (j + scrollRows) * aspect;
     for (let i = 0; i < COLS; i++) {
@@ -269,6 +270,12 @@ function composite(aspect, scrollRows) {
           b += rp * 160;
         } else ch = L > 0.62 ? "~" : L > 0.4 ? "-" : L > 0.2 ? "·" : dn > 0.8 && hash2(i, j) > 0.93 ? "." : " ";
       }
+      if (fl > 0.001) {
+        r += fl * 110;
+        g += fl * 125;
+        b += fl * 140;
+        if (ch === " " && fl > 0.25) ch = ".";
+      }
       cellGlyph[k] = ch;
       cellR[k] = r;
       cellG[k] = g;
@@ -299,9 +306,9 @@ function drawPads() {
           b = 170 - fd * 20;
         }
         cellGlyph[k] = ch;
-        cellR[k] = r;
-        cellG[k] = g;
-        cellB[k] = b;
+        cellR[k] = r + flash * 80;
+        cellG[k] = g + flash * 90;
+        cellB[k] = b + flash * 90;
       }
   }
 }
@@ -409,6 +416,10 @@ function drawLanterns() {
 function paint({ glows, kanji }) {
   ctx.fillStyle = "#040c11";
   ctx.fillRect(0, 0, W, H);
+  if (flash > 0.02) {
+    ctx.fillStyle = `rgba(150,170,190,${flash * 0.12})`;
+    ctx.fillRect(0, 0, W, H);
+  }
   for (const [x, y, w, h, a] of glows) {
     ctx.fillStyle = `rgba(255,150,60,${a})`;
     ctx.fillRect(x, y, w, h);
