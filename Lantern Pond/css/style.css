@@ -231,7 +231,7 @@ footer {
   padding: 10vh 0 6vh;
 }
 
-/* ---- fixed controls: name, still / rain buttons, hint ---- */
+/* ---- fixed controls: name, still / rain / sound buttons, hint ---- */
 #nav {
   position: fixed;
   top: 16px;
@@ -344,6 +344,10 @@ footer {
 #intro button:hover {
   border-color: #e8b77a;
   color: #ffe2b8;
+}
+#intro button.q {
+  border-color: transparent;
+  color: #6f8783;
 }
 #intro.gone {
   opacity: 0;

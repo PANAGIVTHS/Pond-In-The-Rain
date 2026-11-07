@@ -12,13 +12,14 @@ function update(dt) {
 }
 
 function updateWeather(dt) {
-  // rain: drops make small ripples; streaks fall across the surface
+  // rain: drops make small ripples (and the odd drip sound); streaks fall across the surface
   if (rainOn) {
     rainAcc += dt * ((W * H) / 1e6) * 9;
     while (rainAcc > 1) {
       rainAcc--;
       const x = rnd(0, W), y = rnd(0, H);
       addRipple(x, y, rnd(14, 46) * SC, rnd(0.45, 0.9), rnd(28, 42));
+      if (Math.random() < 0.28) drip(x, rnd(0.006, 0.022));
     }
     if (streaks.length < 70 * (W / 1400))
       streaks.push({ x: rnd(-100, W), y: rnd(-H * 0.2, H * 0.6), vx: 90, vy: 620, life: rnd(0.25, 0.6) });
@@ -125,6 +126,7 @@ function chooseGoal(f, h, food, foodDist, dt) {
     if (foodDist < 11 * SC) {
       food.life = 0;
       addRipple(food.x, food.y, 26 * SC, 0.7, 40);
+      tick(food.x);
     }
     return { x: food.x, y: food.y, urgency: 1 };
   }

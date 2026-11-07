@@ -22,6 +22,7 @@ function feed(x, y) {
     pellets.push({ x: px, y: py, life: 14 });
     setTimeout(() => {
       addRipple(px, py, 16 * SC, 0.55, 30);
+      tick(px);
     }, n * 45);
   }
 }
@@ -30,11 +31,13 @@ function feed(x, y) {
 function poke(x, y) {
   addRipple(x, y, 150 * SC, 1.25, 70);
   addRipple(x, y, 105 * SC, 0.8, 62, 0.32);
+  plop(x);
   scare(x, y, 190 * SC, 0.9);
 }
 
 /** a lantern was clicked: it rings and the page goes to its section */
 function openLantern(L) {
+  bell();
   L.intensity = 2.6;
   addRipple(L.x, L.y, 90 * SC, 1, 55);
   const el = $(L.info.target);

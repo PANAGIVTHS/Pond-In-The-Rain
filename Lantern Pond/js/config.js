@@ -19,4 +19,9 @@ const CONFIG = {
     { kanji: "道", label: "tools",   target: "tools" },
     { kanji: "文", label: "contact", target: "contact" },
   ],
+
+  // sound
+  volume: 0.28,        // master volume (0–1)
+  rainVolume: 0.1,     // rain, relative to the other sounds
+  bellVolume: 0.7,     // the lantern bell
 };
