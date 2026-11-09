@@ -14,7 +14,7 @@ function update(dt) {
 function updateWeather(dt) {
   // rain: drops make small ripples (and the odd drip sound); streaks fall across the surface
   if (rainOn) {
-    rainAcc += dt * ((W * H) / 1e6) * 9;
+    rainAcc += dt * ((W * H) / 1e6) * 9 * mood.rain;
     while (rainAcc > 1) {
       rainAcc--;
       const x = rnd(0, W), y = rnd(0, H);
@@ -36,7 +36,7 @@ function updateWeather(dt) {
   // lightning: a double flicker (the card borders flash too), then thunder a moment later
   nextFlash -= dt;
   if (rainOn && nextFlash < 0) {
-    nextFlash = rnd(35, 80);
+    nextFlash = rnd(35, 80) / Math.max(0.5, mood.rain);
     flash = 1;
     setTimeout(() => (flash = 0.7), 140);
     thunder();

@@ -104,7 +104,7 @@ section {
   background: linear-gradient(90deg, rgba(220, 200, 165, 0.35), transparent);
 }
 
-/* ---- frosted-glass cards ---- */
+/* ---- frosted-glass cards (--tint, --tglow and --warm are set from the pond) ---- */
 .glass {
   position: relative;
   background: rgba(5, 15, 21, 0.46);
@@ -116,6 +116,15 @@ section {
     border-color 0.7s ease,
     box-shadow 0.7s ease;
   overflow: hidden;
+  --tint: rgba(190, 215, 210, 0.13);
+  --warm: 0;
+  border-color: var(--tint);
+  --tglow: rgba(0, 0, 0, 0);
+  box-shadow:
+    0 0 26px var(--tglow),
+    inset 0 0 22px var(--tglow),
+    0 0 calc(var(--warm) * 60px) rgba(255, 150, 60, calc(var(--warm) * 0.22)),
+    inset 0 0 calc(var(--warm) * 40px) rgba(255, 150, 60, calc(var(--warm) * 0.07));
 }
 body.flash .glass {
   border-color: rgba(220, 235, 255, 0.55);

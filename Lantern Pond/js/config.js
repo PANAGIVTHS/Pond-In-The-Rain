@@ -20,6 +20,16 @@ const CONFIG = {
     { kanji: "文", label: "contact", target: "contact" },
   ],
 
+  // the pond's mood in each section (by section id):
+  // rain = how hard it rains, warm = dusk lantern light, moon = cool moonlight
+  moods: {
+    top:            { rain: 1,    warm: 0,    moon: 0 },
+    about:          { rain: 0.8,  warm: 0.1,  moon: 0 },
+    projects:       { rain: 0.55, warm: 0.55, moon: 0 },
+    tools:          { rain: 1.7,  warm: 0,    moon: 0 },
+    contact:        { rain: 0.35, warm: 0.1,  moon: 0.8 },
+  },
+
   // sound
   volume: 0.28,        // master volume (0–1)
   rainVolume: 0.1,     // rain, relative to the other sounds

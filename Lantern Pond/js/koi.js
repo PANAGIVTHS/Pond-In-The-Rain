@@ -52,12 +52,32 @@ function makeFish(i) {
     tailPhase: rnd(0, 6),
     seed: rnd(0, 50),       // makes its colour patches unique
     variety: VARIETIES[i % VARIETIES.length],
+    colour: null,           // signature colour (tints the card above it)
     depth: rnd(0.5, 1),     // 0 deep … 1 near the surface
     home: [0.5, 0.5],       // its home patch, as fractions of the screen
     goalX: x, goalY: y, goalTimer: 0, // the spot it's swimming to, and how long before it gets bored
     fleeTimer: 0, fleeAngle: 0,
     wakeTimer: 0,
   };
+}
+
+/** the koi's signature colour = the marking covering most of its body, ignoring white & black */
+function signatureColour(f) {
+  const count = new Map();
+  let total = 0;
+  for (let a = 0; a < 16; a++)
+    for (let b = 0; b < 7; b++) {
+      const c = koiBodyColour(f, a / 15, b / 3 - 1);
+      total++;
+      if (c !== KOI_COLOURS.white && c !== KOI_COLOURS.black) count.set(c, (count.get(c) || 0) + 1);
+    }
+  let best = null, bestN = 0;
+  for (const [c, n] of count)
+    if (n > bestN) {
+      bestN = n;
+      best = c;
+    }
+  return best && bestN / total > 0.18 ? best : [235, 228, 214];
 }
 
 /** each koi wanders around its own home patch; patches are a loose grid so the pond fills evenly */
@@ -101,4 +121,5 @@ function spawnKoi() {
       n.y = y - Math.sin(a) * f.segLen * k;
     });
   }
+  for (const f of fish) f.colour = signatureColour(f);
 }

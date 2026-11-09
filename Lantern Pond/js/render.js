@@ -232,9 +232,9 @@ function stampKoi(f) {
   }
 }
 
-/** every cell becomes koi or water, with ripples, light and lightning */
+/** every cell becomes koi or water, with ripples, light, the section's mood and lightning */
 function composite(aspect, scrollRows) {
-  const fl = flash * flash;
+  const fl = flash * flash, warm = mood.warm, moon = mood.moon;
   for (let j = 0; j < ROWS; j++) {
     const y = (j + scrollRows) * aspect;
     for (let i = 0; i < COLS; i++) {
@@ -255,9 +255,9 @@ function composite(aspect, scrollRows) {
         }
       } else {
         const L = nt * 0.9 * (1 - sh * 0.8) + gw * 0.35;
-        r = 5 + dn * 6 + L * 45 + gw * 120;
-        g = 16 + dn * 12 + L * 120 + gw * 72;
-        b = 24 + dn * 14 + L * 130 + gw * 30;
+        r = 5 + dn * 6 + L * (45 + warm * 70 + moon * 30) + gw * 120 + warm * 6;
+        g = 16 + dn * 12 + L * (120 - warm * 20 + moon * 30) + gw * 72 + warm * 2;
+        b = 24 + dn * 14 + L * (130 - warm * 50 + moon * 70) + gw * 30 + moon * 10;
         if (sh > 0) {
           r *= 1 - sh * 0.55;
           g *= 1 - sh * 0.55;
