@@ -3,7 +3,7 @@
    1. light layers: the caustic net, ripple rings, lantern glow
    2. koi, deepest first, into the koi layer
    3. composite: every cell becomes koi or water, plus ripples, light, mood, lightning
-   4. things on the surface: lily pads, the name, rain, food, lanterns
+   4. things on the surface: lily pads, the name, rain, food, sparks, lanterns
    5. paint: one character per cell onto the canvas
    ============================================================================= */
 
@@ -334,7 +334,7 @@ function drawTitle() {
   }
 }
 
-/** rain streaks and food pellets */
+/** rain streaks, food pellets and sparks from rising lanterns */
 function drawSurfaceBits() {
   for (const s of streaks) {
     const k = cellAt(s.x, s.y);
@@ -354,6 +354,15 @@ function drawSurfaceBits() {
     cellR[k] = lerp(cellR[k], 196, a);
     cellG[k] = lerp(cellG[k], 142, a);
     cellB[k] = lerp(cellB[k], 86, a);
+  }
+  for (const s of sparks) {
+    const k = cellAt(s.x, s.y);
+    if (k < 0) continue;
+    const a = Math.min(1, s.life);
+    cellGlyph[k] = s.life > 0.7 ? "*" : "·";
+    cellR[k] = 255 * a + cellR[k] * (1 - a);
+    cellG[k] = 190 * a + cellG[k] * (1 - a);
+    cellB[k] = 110 * a + cellB[k] * (1 - a);
   }
 }
 
@@ -379,20 +388,21 @@ function drawLanterns() {
     kanji.push([(cx + 0.5) * CW, (cy + 0.5) * CH, L.info.kanji, flicker, hv]);
 
     // reflection: a wobbling column of ~ ≈ below it
-    for (let n = 2; n <= 5; n++) {
-      const j = cy + n;
-      if (j >= ROWS) break;
-      const w = Math.round(Math.sin(t * 2.2 + n * 1.3 + L.phase) * 0.9);
-      for (const o of [0, w]) {
-        const i = cx + o;
-        if (i < 0 || i >= COLS) continue;
-        const k = j * COLS + i, a = (1 - n / 6) * 0.55 * flicker;
-        cellGlyph[k] = n % 2 ? "~" : "≈";
-        cellR[k] = lerp(cellR[k], 230, a);
-        cellG[k] = lerp(cellG[k], 150, a);
-        cellB[k] = lerp(cellB[k], 70, a);
+    if (L.state !== "rise")
+      for (let n = 2; n <= 5; n++) {
+        const j = cy + n;
+        if (j >= ROWS) break;
+        const w = Math.round(Math.sin(t * 2.2 + n * 1.3 + L.phase) * 0.9);
+        for (const o of [0, w]) {
+          const i = cx + o;
+          if (i < 0 || i >= COLS) continue;
+          const k = j * COLS + i, a = (1 - n / 6) * 0.55 * flicker;
+          cellGlyph[k] = n % 2 ? "~" : "≈";
+          cellR[k] = lerp(cellR[k], 230, a);
+          cellG[k] = lerp(cellG[k], 150, a);
+          cellB[k] = lerp(cellB[k], 70, a);
+        }
       }
-    }
 
     // label above a map lantern ("→ about"), brighter on hover
     if (L.kind === "nav" && L.state === "float") {

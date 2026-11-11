@@ -1,5 +1,6 @@
 /* =============================================================================
-   Lanterns: the floating map of the site, one per section.
+   Lanterns: the floating map of the site (one per section), plus the lanterns
+   released by the contact form, which rise and drift away.
    ============================================================================= */
 
 let lanterns = [];
@@ -16,12 +17,13 @@ function lanternHome(i) {
 function makeLantern(info, kind, x, y, extra) {
   return {
     info,          // { kanji, label, target }
-    kind,          // "nav": a map lantern
+    kind,          // "nav" (a map lantern) or "msg" (released by the contact form)
     x, y,
     homeX: 0, homeY: 0,
     vx: 0, vy: 0,
     phase: rnd(0, 6), // flicker
-    state: "float",
+    state: "float",   // "float", "rise" (a message flying away) or "gone"
+    riseTime: 0,
     hover: 0,         // 0..1, eases toward 1 while the pointer is on it
     intensity: 1,     // brighter for a moment after it's clicked
     ...extra,
@@ -35,6 +37,11 @@ function makeLanterns() {
   });
 }
 
+/** a message lantern rising from the contact form */
+function releaseLantern(x, y) {
+  lanterns.push(makeLantern({ kanji: "灯", label: "" }, "msg", x, y, { state: "rise", intensity: 1.5 }));
+}
+
 /** the floating lantern under a point, if any */
 const lanternAt = (x, y) =>
   lanterns.find(L => L.state === "float" && Math.abs(x - L.x) < 4.2 * CW && Math.abs(y - L.y) < 2 * CH) || null;
@@ -43,6 +50,18 @@ function updateLanterns(dt) {
   lanterns.forEach((L, i) => {
     L.phase += dt;
     L.hover = lerp(L.hover, hovered === L ? 1 : 0, 1 - Math.exp(-dt * 8));
+
+    if (L.state === "rise") {
+      // a sent message drifts up and away, shedding sparks
+      L.riseTime += dt;
+      L.y -= (25 + L.riseTime * L.riseTime * 90) * dt;
+      L.x += Math.sin(L.riseTime * 1.3 + L.phase) * 12 * dt;
+      L.intensity = 1.3 + 0.3 * Math.sin(L.riseTime * 3);
+      if (Math.random() < 0.5)
+        sparks.push({ x: L.x + rnd(-14, 14), y: L.y + rnd(0, 10), vx: rnd(-8, 8), vy: rnd(-40, -10), life: rnd(0.6, 1.4) });
+      if (L.y < -80) L.state = "gone";
+      return;
+    }
 
     if (L.intensity > 1) L.intensity = Math.max(1, L.intensity - dt * 1.2);
     // drift on a slow current and spring gently home
@@ -71,4 +90,5 @@ function updateLanterns(dt) {
     L.x = clamp(L.x + L.vx * dt * 10, 50, W - 50);
     L.y = clamp(L.y + L.vy * dt * 10, 60, H - 60);
   });
+  lanterns = lanterns.filter(L => L.state !== "gone");
 }

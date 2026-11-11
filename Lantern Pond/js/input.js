@@ -1,5 +1,5 @@
 /* =============================================================================
-   Input: the water and the lanterns.
+   Input: the water, the lanterns and the contact form.
    On the water: move = a small wake, click = a ripple that scares koi,
    right-click / long-press = food, click a lantern = go to its section.
    ============================================================================= */
@@ -43,6 +43,31 @@ function openLantern(L) {
   const el = $(L.info.target);
   if (el) el.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
 }
+
+// ---- contact form: keystrokes are raindrops, sending releases a lantern
+// (demo: it isn't connected to anything; hook it up to a form service to receive messages)
+const formName = $("fName"), formMsg = $("fMsg"), formNote = $("fNote");
+[formName, formMsg].forEach(inp =>
+  inp.addEventListener("input", () => {
+    const r = inp.getBoundingClientRect(), x = r.left + 14 + ((inp.value.length * 7.8) % Math.max(40, r.width - 28));
+    addRipple(x, r.bottom - 8, 22 * SC, 0.6, 34);
+    drip(x, 0.012);
+  })
+);
+$("form").addEventListener("submit", e => {
+  e.preventDefault();
+  if (!formMsg.value.trim()) {
+    formNote.textContent = "write a few words first ~";
+    return;
+  }
+  const r = e.target.querySelector(".send").getBoundingClientRect(), x = r.left + r.width / 2;
+  releaseLantern(x, r.top);
+  addRipple(x, r.top, 120 * SC, 1.1, 60);
+  bell();
+  formNote.textContent = "✦ lantern released. (demo: this form is not connected yet, so nothing was sent; hook it up to a form service)";
+  formMsg.value = "";
+  formName.value = "";
+});
 
 // ---- the water itself
 canvas.addEventListener("contextmenu", e => e.preventDefault());

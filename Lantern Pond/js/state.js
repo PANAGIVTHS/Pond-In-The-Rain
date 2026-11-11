@@ -21,6 +21,7 @@ let pressTimer = null;      // long-press to feed on touch screens
 
 let ripples = [];           // { x, y, r, max, strength, speed } expanding rings
 let pellets = [];           // food
+let sparks = [];            // from rising message lanterns
 let streaks = [];           // rain streaks
 
 /** starts a ripple ring; delay (s) holds it back so rings can follow each other */
