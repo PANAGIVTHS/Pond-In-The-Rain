@@ -7,6 +7,7 @@ let lanterns = [];
 
 /** half the width of the page's content column: lanterns live outside it, in the side margins */
 const contentHalfWidth = () => Math.min(760, W * 0.9) / 2;
+const lanternInMiddle = L => L.state === "float" && Math.abs(L.x - W / 2) < contentHalfWidth() - 30 * SC;
 
 /** lantern i's resting place: alternating left / right margins, spread down the screen */
 function lanternHome(i) {

@@ -35,11 +35,24 @@ function poke(x, y) {
   scare(x, y, 190 * SC, 0.9);
 }
 
-/** a lantern was clicked: it rings and the page goes to its section */
+/** a lantern was clicked: it rings, one nearby koi comes to look, and the page goes to its section */
 function openLantern(L) {
   bell();
   L.intensity = 2.6;
   addRipple(L.x, L.y, 90 * SC, 1, 55);
+  let visitor = null, best = 1e9;
+  for (const f of fish) {
+    const d = Math.hypot(f.nodes[0].x - L.x, f.nodes[0].y - L.y) * rnd(0.6, 1.4); // usually the nearest, not always
+    if (d < best) {
+      best = d;
+      visitor = f;
+    }
+  }
+  if (visitor) {
+    visitor.visitTimer = rnd(6, 9);
+    visitor.visitLantern = L;
+    visitor.orbit = Math.atan2(visitor.nodes[0].y - L.y, visitor.nodes[0].x - L.x);
+  }
   const el = $(L.info.target);
   if (el) el.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
 }

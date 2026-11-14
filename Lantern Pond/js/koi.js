@@ -57,7 +57,11 @@ function makeFish(i) {
     home: [0.5, 0.5],       // its home patch, as fractions of the screen
     goalX: x, goalY: y, goalTimer: 0, // the spot it's swimming to, and how long before it gets bored
     fleeTimer: 0, fleeAngle: 0,
+    calmTimer: 0,           // after a scare, a moment before it does "chores"
     wakeTimer: 0,
+    visitTimer: 0, visitLantern: null, orbit: 0, // circling a lantern you clicked
+    buddy: null, buddyTimer: 0, pairCooldown: rnd(5, 15), // swimming side by side with another koi
+    herdLantern: null, herdTimer: 0, // pushing a stray lantern back out to the side
   };
 }
 
