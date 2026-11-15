@@ -1,6 +1,6 @@
 /* =============================================================================
-   The simulation, stepped once per frame: weather, then every koi, lantern
-   and spark.
+   The simulation, stepped once per frame: weather, then every koi, lantern,
+   spark and leaf.
    ============================================================================= */
 
 function update(dt) {
@@ -15,6 +15,7 @@ function update(dt) {
     s.life -= dt;
   }
   sparks = sparks.filter(s => s.life > 0);
+  updateLeaves(dt);
 }
 
 function updateWeather(dt) {

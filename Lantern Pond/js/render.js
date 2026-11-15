@@ -3,7 +3,7 @@
    1. light layers: the caustic net, ripple rings, lantern glow
    2. koi, deepest first, into the koi layer
    3. composite: every cell becomes koi or water, plus ripples, light, mood, lightning
-   4. things on the surface: lily pads, the name, rain, food, sparks, lanterns
+   4. things on the surface: lily pads, leaves, the name, rain, food, sparks, lanterns
    5. paint: one character per cell onto the canvas
    ============================================================================= */
 
@@ -13,7 +13,11 @@ const LIGHT_DIR = (() => {    // light from the upper left
   return v.map(x => x / l);
 })();
 
+// painted under the characters each frame (see paint)
+let cellTints = []; // a solid tint behind a cell: [i, j, r, g, b, alpha, …] (leaves)
+
 function render() {
+  cellTints = [];
   rippleStrength.fill(0);
   lanternGlow.fill(0);
   koiShadow.fill(0);
@@ -28,6 +32,7 @@ function render() {
   composite(aspect, scrollRows);
 
   drawPads();
+  renderLeaves();
   drawTitle();
   drawSurfaceBits();
   const lanternSprites = drawLanterns();
@@ -422,7 +427,7 @@ function drawLanterns() {
   return { glows, kanji };
 }
 
-/** puts it all on the canvas: background, lantern glows, the characters, then the kanji */
+/** puts it all on the canvas: background, lantern glows, leaf tints, the characters, then the kanji */
 function paint({ glows, kanji }) {
   ctx.fillStyle = "#040c11";
   ctx.fillRect(0, 0, W, H);
@@ -438,6 +443,10 @@ function paint({ glows, kanji }) {
     g.addColorStop(1, "rgba(255,140,50,0)");
     ctx.fillStyle = g;
     ctx.fillRect(x - w * 0.4, y - h * 0.6, w * 1.8, h * 2.2);
+  }
+  for (let n = 0; n < cellTints.length; n += 6) {
+    ctx.fillStyle = `rgba(${cellTints[n + 2] | 0},${cellTints[n + 3] | 0},${cellTints[n + 4] | 0},${cellTints[n + 5].toFixed(2)})`;
+    ctx.fillRect(cellTints[n] * CW - 0.5, cellTints[n + 1] * CH - 0.5, CW + 1, CH + 1);
   }
 
   ctx.font = `${FS}px ${FONT}`;

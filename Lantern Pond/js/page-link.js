@@ -46,6 +46,7 @@ function scrollParallax() {
   }
   for (const p of pellets) p.y += shift;
   for (const r of ripples) r.y += shift;
+  for (const d of leaves) d.y += shift;
   for (const p of pads) {
     // lily pads wrap around top ↔ bottom
     p.y += shift;
