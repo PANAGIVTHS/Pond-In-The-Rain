@@ -3,6 +3,7 @@
    - scrolling drifts the pond (parallax) and stirs the water
    - each section sets the pond's mood (rain, warm dusk, moonlight)
    - a koi under a card tints its border; lanterns warm nearby cards
+   - raindrops now and then slide down a card's glass
    ============================================================================= */
 
 const glassEls = [...document.querySelectorAll(".glass")];
@@ -30,6 +31,12 @@ function pageLink(dt) {
   if (cardTintTimer < 0) {
     cardTintTimer = 0.12;
     tintCards();
+  }
+
+  dropTimer -= dt;
+  if (rainOn && !still && dropTimer < 0) {
+    dropTimer = rnd(2, 5) / Math.max(0.4, mood.rain);
+    slideRaindrop();
   }
 }
 
@@ -81,4 +88,20 @@ function tintCards() {
     }
     el.style.setProperty("--warm", Math.min(1, warm * 0.8 + mood.warm * 0.25).toFixed(2));
   }
+}
+
+/** a raindrop slides down the glass of a random visible card */
+function slideRaindrop() {
+  const visible = glassEls.filter(el => {
+    const r = el.getBoundingClientRect();
+    return r.bottom > 0 && r.top < H;
+  });
+  if (!visible.length) return;
+  const el = visible[(Math.random() * visible.length) | 0], drop = document.createElement("span"), r = el.getBoundingClientRect();
+  drop.className = "drop";
+  drop.style.left = rnd(4, 96) + "%";
+  drop.style.setProperty("--y", r.height * rnd(0.3, 0.9) + "px");
+  drop.style.setProperty("--d", rnd(3, 6) + "s");
+  drop.addEventListener("animationend", () => drop.remove());
+  el.appendChild(drop);
 }

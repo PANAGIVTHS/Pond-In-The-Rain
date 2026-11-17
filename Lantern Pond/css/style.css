@@ -285,6 +285,31 @@ footer {
   padding: 10vh 0 6vh;
 }
 
+/* ---- raindrops sliding down the glass ---- */
+.drop {
+  position: absolute;
+  top: -6px;
+  width: 2px;
+  height: 9px;
+  border-radius: 2px;
+  background: linear-gradient(rgba(190, 225, 235, 0), rgba(200, 230, 240, 0.55));
+  pointer-events: none;
+  animation: slide var(--d, 4s) cubic-bezier(0.4, 0, 0.8, 1) forwards;
+}
+@keyframes slide {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--y, 120px));
+    opacity: 0;
+  }
+}
+
 /* ---- fixed controls: name, still / rain / sound buttons, hint ---- */
 #nav {
   position: fixed;

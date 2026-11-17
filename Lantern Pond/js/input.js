@@ -1,5 +1,5 @@
 /* =============================================================================
-   Input: the water, the lanterns and the contact form.
+   Input: the water, the cards, the lanterns and the contact form.
    On the water: move = a small wake, click = a ripple that scares koi,
    right-click / long-press = food, click a lantern = go to its section.
    ============================================================================= */
@@ -56,6 +56,23 @@ function openLantern(L) {
   const el = $(L.info.target);
   if (el) el.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
 }
+
+// ---- the cards: hovering sends ripples from their corners, clicking ripples under the glass
+glassEls.forEach(el => {
+  el.addEventListener("pointerenter", () => {
+    const r = el.getBoundingClientRect();
+    addRipple(r.left, r.top, 70 * SC, 0.55, 48);
+    addRipple(r.right, r.bottom, 70 * SC, 0.55, 48, 0.15);
+  });
+  el.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+    const x = e.clientX, y = e.clientY;
+    addRipple(x, y, 120 * SC, 1.05, 65);
+    addRipple(x, y, 80 * SC, 0.65, 58, 0.3);
+    plop(x);
+    scare(x, y, 150 * SC, 0.6);
+  });
+});
 
 // ---- contact form: keystrokes are raindrops, sending releases a lantern
 // (demo: it isn't connected to anything; hook it up to a form service to receive messages)
