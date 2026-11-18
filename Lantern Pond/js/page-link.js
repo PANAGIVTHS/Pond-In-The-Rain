@@ -13,10 +13,10 @@ const moodSections = ["top", ...Object.keys(CONFIG.moods).filter(k => k !== "top
 function pageLink(dt) {
   scrollParallax();
 
-  // the section whose top has passed the middle of the screen sets the mood
+  // the section whose top has passed the middle of the screen sets the mood (hidden sections don't count)
   let current = "top";
   for (const el of moodSections) {
-    if (el.getBoundingClientRect().top < H * 0.55) current = el.id;
+    if (el.offsetParent && el.getBoundingClientRect().top < H * 0.55) current = el.id;
   }
   const m = CONFIG.moods[current] || CONFIG.moods.top, k = 1 - Math.exp(-dt * 1.2);
   mood.rain = lerp(mood.rain, m.rain, k);

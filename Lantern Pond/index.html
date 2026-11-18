@@ -18,7 +18,8 @@
 
 <!-- ============================ PAGE CONTENT: edit me ============================
      Each <section> is a part of the page; its id is what the lanterns and links point to.
-     (the pond's mood per section is in js/config.js)
+     A project page is a <section class="projectPage" id="project-…" hidden>, opened by a card
+     with data-open="project-…" or any link to #project-…  (the pond's mood per section is in js/config.js)
      ================================================================================== -->
 <main id="page">
   <div class="hero" id="top"><div class="scrollcue">scroll<br>↓</div></div>
@@ -48,10 +49,72 @@
           <p>A 12-key hot-swap macro pad with a rotary encoder and an RP2040, designed and routed in KiCad.</p>
           <div class="chips"><span>KiCad</span><span>RP2040</span><span>QMK</span></div>
           <a class="lnk" href="#">schematic →</a></article>
-        <article class="glass proj"><div class="hk">池</div><div class="tag">SOFTWARE</div><h3>This Pond</h3>
+        <article class="glass proj open" data-open="project-pond"><div class="hk">池</div><div class="tag">SOFTWARE</div><h3>This Pond</h3>
           <p>The text-mode renderer behind this site: koi built from spine chains, caustics from drifting noise, procedural rain audio.</p>
           <div class="chips"><span>JavaScript</span><span>Canvas</span><span>WebAudio</span></div>
-          <a class="lnk" href="#">code →</a></article>
+          <a class="lnk" href="#project-pond">read more →</a><a class="lnk" href="#">code →</a></article>
+      </div>
+    </section>
+
+    <!-- ============ project page: This Pond (shown at #project-pond) ============ -->
+    <section id="project-pond" class="projectPage" hidden>
+      <a class="back" href="#projects">← all work</a>
+      <div class="shead"><span class="kj">池</span>this pond</div>
+      <div class="glass">
+        <div class="tag">SOFTWARE · INTERACTIVE · 2026</div>
+        <h2>This Pond</h2>
+        <p>The background of this site is a small, living koi pond drawn entirely out of text characters. Koi swim, rain falls,
+          lanterns drift and autumn leaves fall, and the pond reacts to you and to the page on top of it. There are no images, sprites,
+          libraries or sound files: everything is computed in about 660 lines of plain JavaScript and painted onto one canvas, sixty times a second.</p>
+        <div class="chips"><span>JavaScript</span><span>Canvas 2D</span><span>Web Audio</span><span>no libraries</span><span>~660 lines</span><span>60 fps</span></div>
+
+        <h3>How it's drawn</h3>
+        <p>The screen is treated as a grid of character cells, like a terminal. Every frame the pond is built into a few layers, one value per cell:
+          the water's light, ripple rings, lantern glow, the koi, the leaves and the title. Then each cell gets one character and one colour.
+          Shapes are never stored as pictures; they're described by maths and "sampled" into cells, so the whole scene can move and resize freely.</p>
+<pre>  pond state            per-cell layers            one canvas
+  koi, ripples,   ──►   glyph + colour      ──►   one character
+  light, leaves         for every cell            per cell</pre>
+        <p>The shimmering light on the water comes from two slowly drifting noise fields: where their values meet, light gathers into a moving net of
+          <code>· - ~</code>. Ripples are rings drawn with whichever of <code>- \ | /</code> follows the ring's curve at that point, which is why they look round even though they're made of text.</p>
+
+        <h3>The koi</h3>
+        <p>Each koi is a chain of eleven points: the head swims, and the body follows the path the head took, so it bends naturally through turns.
+          For every cell near a koi, the code finds the closest point on that spine, works out how far across the body the cell is, and shades it as if
+          lit from the upper left, choosing a denser character for shadow and a lighter one for light (<code>@%#&8o*+:</code>).
+          Nine real koi varieties (kohaku, tancho, showa, asagi and others) are just colour rules over the body, and eyes, a forked tail and pectoral fins are added on top.</p>
+        <p>Their behaviour is a few simple rules working together:</p>
+        <ul>
+          <li>each koi has its own <span class="em">home patch</span> and meanders around it, mostly forward, so the pond fills evenly</li>
+          <li>a koi can't turn tighter than its body can follow, so it never folds into itself</li>
+          <li>they keep their distance from each other's bodies, and now and then two swim side by side for a while</li>
+          <li>they flee from clicks, race for food, look at a lantern you light up, and keep out from under the name at the top</li>
+          <li>a koi will occasionally nudge a lantern that drifted behind the page back out to the side</li>
+        </ul>
+
+        <h3>Weather, leaves and sound</h3>
+        <p>Rain drops make small ripples and streaks; lightning flickers the whole scene and the card borders, followed by thunder a moment later.
+          It's always autumn: long olive leaves land, drift to the sides, then darken and sink.
+          All the sound is synthesised live in the browser: rain is filtered pink noise, the drips and the lantern bell are tuned oscillators, and thunder is
+          a burst of noise shaped into a crack and a long roll.</p>
+
+        <h3>The pond and the page</h3>
+        <p>The pond isn't just behind the page; the two talk to each other. Scrolling drifts the pond and stirs the water; each section has its own light
+          and rain; a koi swimming under a card tints its border in that koi's colour; lanterns warm the cards they float near, raindrops slide down the glass,
+          and the lanterns double as a map of the site.</p>
+
+        <h3>What was hard</h3>
+        <p><span class="em">Making koi move like fish.</span> Early versions folded into themselves, slid sideways in rigid U-shapes, or circled forever around a
+          point they could never reach. Each fix came from finding the real cause rather than adding another rule: letting the body follow the head's path,
+          and limiting how tightly a koi can turn based on its own length.</p>
+        <p><span class="em">Stopping them from piling up.</span> Watching wasn't enough to tell whether a change helped, so I built a test that fast-forwards
+          fifteen minutes of pond time and counts overlaps and clumps. It showed that clever avoidance rules barely mattered; what mattered was how much open water
+          there is, where the koi start, and keeping their home patches out from under the title.</p>
+        <p><span class="em">A readable name made of text.</span> Thin, elegant letters fall apart when they're turned into character cells. The name is now
+          pre-rendered once and sampled into a classic ASCII density ramp, so it looks the same on every device.</p>
+
+        <div class="chips" style="margin-top:22px"><span>procedural animation</span><span>simulation</span><span>generative art</span><span>sound synthesis</span></div>
+        <a class="lnk" href="#">code →</a><a class="lnk" href="#projects">← back to all work</a>
       </div>
     </section>
 

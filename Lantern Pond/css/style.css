@@ -216,6 +216,64 @@ body.flash .glass {
   color: #ffb98a;
 }
 
+/* ---- project pages (#project-…) ---- */
+.proj.open {
+  cursor: pointer;
+}
+.proj.open:hover h3 {
+  color: #ffe2b8;
+}
+body.proj-view #about,
+body.proj-view #projects,
+body.proj-view #tools,
+body.proj-view #contact {
+  display: none;
+}
+.back {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: rgba(220, 200, 165, 0.75);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-decoration: none;
+}
+.back:hover {
+  color: #ffcf9a;
+}
+.projectPage .glass h3 {
+  margin-top: 28px;
+}
+.projectPage .glass ul {
+  margin: 0 0 12px;
+  padding-left: 0;
+  list-style: none;
+  font-size: 13px;
+  line-height: 1.85;
+  color: #b9c7c2;
+}
+.projectPage .glass li:before {
+  content: "~ ";
+  color: rgba(110, 190, 200, 0.6);
+}
+.projectPage pre {
+  margin: 6px 0 16px;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(190, 215, 210, 0.12);
+  font:
+    11.5px/1.5 "JetBrains Mono",
+    monospace;
+  color: #8fb3ae;
+  overflow-x: auto;
+}
+.projectPage code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  color: #e9d7b8;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 4px;
+}
+
 /* ---- tools ---- */
 .cols {
   display: grid;

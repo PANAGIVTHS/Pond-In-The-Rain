@@ -53,6 +53,10 @@ function openLantern(L) {
     visitor.visitLantern = L;
     visitor.orbit = Math.atan2(visitor.nodes[0].y - L.y, visitor.nodes[0].x - L.x);
   }
+  if (inProjectView()) {
+    location.hash = L.info.target; // leave the project page; route() scrolls there
+    return;
+  }
   const el = $(L.info.target);
   if (el) el.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
 }

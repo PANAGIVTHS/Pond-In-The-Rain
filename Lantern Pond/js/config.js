@@ -28,6 +28,7 @@ const CONFIG = {
     projects:       { rain: 0.55, warm: 0.55, moon: 0 },
     tools:          { rain: 1.7,  warm: 0,    moon: 0 },
     contact:        { rain: 0.35, warm: 0.1,  moon: 0.8 },
+    "project-pond": { rain: 0.6,  warm: 0.35, moon: 0.3 },
   },
 
   // sound
