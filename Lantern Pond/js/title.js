@@ -4,6 +4,14 @@
    sampled to see how much of it the letters cover; coverage picks a character.
    ============================================================================= */
 
+// The name is pre-rendered (js/title-image.js) so it looks identical on every device,
+// whatever fonts it has. It's used when CONFIG.name matches; otherwise the name is typed in the web font.
+const titleImg = new Image();
+titleImg.onload = () => {
+  if (N) resize();
+};
+titleImg.src = TITLE_IMG.src;
+
 // how a cell's coverage (c, 0..1) becomes a character: [glyph, opacity], or null for an empty cell.
 // e.edge = the cell sits on an outline, e.angleFrom45 = how far that outline is from a 45° diagonal,
 // e.slash = the / or \ that follows it. (Copied verbatim from headers/header_soft.html and header_ascii.html.)
@@ -31,20 +39,26 @@ function buildTitle() {
   off.height = H;
   const o = off.getContext("2d");
   const lines = CONFIG.name.split("\n"), nl = lines.length;
+  const useImg = CONFIG.name === TITLE_IMG.name && titleImg.complete && titleImg.naturalWidth > 0;
   let size = Math.min(H * (nl > 1 ? 0.2 : 0.21), W * 0.2);
   const setFont = () => (o.font = `italic 500 ${size}px "Cormorant Garamond", Georgia, serif`);
   setFont();
-  const textW = Math.max(...lines.map(l => o.measureText(l).width));
+  const textW = useImg ? TITLE_IMG.twRatio * size : Math.max(...lines.map(l => o.measureText(l).width));
   if (textW > W * 0.86) {
     size *= (W * 0.86) / textW;
     setFont();
   }
   const lineH = size * 0.92;
   const lastY = H * 0.29 + ((nl - 1) * lineH) / 2; // the last line sits where a one-line name would
-  o.fillStyle = "#fff";
-  o.textAlign = "center";
-  o.textBaseline = "middle";
-  lines.forEach((l, n) => o.fillText(l, W / 2, lastY - (nl - 1 - n) * lineH));
+  if (useImg) {
+    const k = size / TITLE_IMG.S0, iw = titleImg.naturalWidth * k, ih = titleImg.naturalHeight * k;
+    o.drawImage(titleImg, W / 2 - iw / 2, H * 0.29 - ih / 2, iw, ih);
+  } else {
+    o.fillStyle = "#fff";
+    o.textAlign = "center";
+    o.textBaseline = "middle";
+    lines.forEach((l, n) => o.fillText(l, W / 2, lastY - (nl - 1 - n) * lineH));
+  }
 
   // 2. sample each cell at 3×3 points: average coverage and the strongest single sample
   const px = o.getImageData(0, 0, W, H).data;
