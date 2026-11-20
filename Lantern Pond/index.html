@@ -18,41 +18,452 @@
 
 <!-- ============================ PAGE CONTENT: edit me ============================
      Each <section> is a part of the page; its id is what the lanterns and links point to.
-     A project page is a <section class="projectPage" id="project-…" hidden>, opened by a card
-     with data-open="project-…" or any link to #project-…  (the pond's mood per section is in js/config.js)
+     A project page is a <section class="projectPage" id="…" hidden>, opened by a card with
+     data-open="…" or any link to #…  (the pond's mood per section is in js/config.js).
+     Images live in img/<project>/; strip their metadata before adding new ones.
      ================================================================================== -->
 <main id="page">
   <div class="hero" id="top"><div class="scrollcue">scroll<br>↓</div></div>
   <div class="wrap">
 
+    <!-- PLACEHOLDER: rewrite the about section in your own voice -->
     <section id="about">
       <div class="shead"><span class="kj">私</span>about</div>
       <div class="glass">
-        <h2>Hi, I make small machines and quiet worlds.</h2>
-        <p>I'm a <span class="em">hardware / software</span> person who likes knowing how things work all the way down: from the transistor to the pixel. I design boards, write HDL, build tools, and make games with slow, rainy atmospheres.</p>
-        <p>Outside of that: anime, synths, late-night soldering, and listening to rain. This pond is what my head sounds like. (Placeholder text: rewrite it in your own voice.)</p>
+        <h2>Hi, I build processors and the tools around them.</h2>
+        <p>I'm an <span class="em">Electrical and Computer Engineering</span> student at the University of Thessaly, interested in
+          <span class="em">GPU and processor architecture</span>: how a design turns into pipelines, memory systems and timing paths, and how
+          software ends up using them. My largest project so far is a SIMT GPGPU written from scratch in SystemVerilog that runs C kernels on an FPGA and draws to HDMI.</p>
+        <p>I also enjoy performance work on the software side (CUDA, OpenMP, profiling) and the parts of hardware most people never look at,
+          like timing closure or the radio noise a memory bus makes. (Placeholder text: rewrite it in your own voice.)</p>
       </div>
     </section>
 
     <section id="projects">
       <div class="shead"><span class="kj">作</span>selected work</div>
       <div class="grid">
-        <article class="glass proj"><div class="hk">機</div><div class="tag">HARDWARE</div><h3>RISC-V Soft Core</h3>
-          <p>A five-stage pipelined RV32I core written from scratch, running on a cheap FPGA board. Boots a tiny monitor over UART.</p>
-          <div class="chips"><span>SystemVerilog</span><span>FPGA</span><span>Verilator</span></div>
-          <a class="lnk" href="#">code →</a><a class="lnk" href="#">write-up →</a></article>
-        <article class="glass proj"><div class="hk">遊</div><div class="tag">GAME</div><h3>Lantern Drift</h3>
-          <p>A slow, rainy puzzle game about guiding paper lanterns down a river at night.</p>
-          <div class="chips"><span>Godot</span><span>GDScript</span><span>FMOD</span></div>
-          <a class="lnk" href="#">play →</a></article>
-        <article class="glass proj"><div class="hk">板</div><div class="tag">HARDWARE</div><h3>Macro Pad PCB</h3>
-          <p>A 12-key hot-swap macro pad with a rotary encoder and an RP2040, designed and routed in KiCad.</p>
-          <div class="chips"><span>KiCad</span><span>RP2040</span><span>QMK</span></div>
-          <a class="lnk" href="#">schematic →</a></article>
-        <article class="glass proj open" data-open="project-pond"><div class="hk">池</div><div class="tag">SOFTWARE</div><h3>This Pond</h3>
+        <article class="glass proj open feature" data-open="project-gpgpu"><div class="hk">算</div><div class="tag">HARDWARE · GPU ARCHITECTURE · RTL</div><h3>GPGPU: a SIMT processor on an FPGA</h3>
+          <p>A GPU-style compute core designed from scratch: 32 RISC-V lanes in lockstep behind one shared fetch/decode, a coalescing AXI4 memory
+            subsystem to DDR, CSRs, interrupts, fault reporting and performance counters. Runs compiled C kernels on a Zynq-7020 and writes the frames it renders straight to HDMI.</p>
+          <div class="chips"><span>SystemVerilog</span><span>RISC-V</span><span>SIMT</span><span>AXI4</span><span>Verilator</span><span>Vivado</span><span>Python</span></div>
+          <a class="lnk" href="#project-gpgpu">read more →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE338-Parallel-Computer-Architecture" target="_blank" rel="noopener">code →</a></article>
+        <article class="glass proj open" data-open="project-cv32e40p"><div class="hk">核</div><div class="tag">HARDWARE · MICROARCHITECTURE</div><h3>Faster CV32E40P by removing forwarding</h3>
+          <p>Removing selected forwarding paths from an open-source RISC-V core to win FPGA timing: 66.8 → 73.2 MHz, about 9% faster on most benchmarks, checked against its cost in stall cycles.</p>
+          <div class="chips"><span>SystemVerilog</span><span>RISC-V</span><span>Vivado</span><span>timing closure</span></div>
+          <a class="lnk" href="#project-cv32e40p">read more →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE494-Microprocessor-Design" target="_blank" rel="noopener">code →</a></article>
+        <article class="glass proj open" data-open="project-nbody"><div class="hk">速</div><div class="tag">GPU COMPUTING · CUDA</div><h3>CUDA N-body: 2910× faster</h3>
+          <p>A galaxy N-body simulator taken from one CPU core to four Tesla K80 GPUs, one measured optimisation at a time: SoA, shared-memory tiling, intrinsics, launch bounds and divergence removal.</p>
+          <div class="chips"><span>CUDA</span><span>OpenMP</span><span>multi-GPU</span><span>profiling</span></div>
+          <a class="lnk" href="#project-nbody">read more →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE415-High-Performance-Computing" target="_blank" rel="noopener">code →</a></article>
+        <article class="glass proj open" data-open="project-airgap"><div class="hk">漏</div><div class="tag">HARDWARE SECURITY · SIDE CHANNELS</div><h3>Leaking data through DDR emissions</h3>
+          <p>An air-gap covert channel: a user-space program modulates DDR bus activity and an SDR two metres away decodes an AES key from the radio noise.</p>
+          <div class="chips"><span>C</span><span>SDR</span><span>GNU Radio</span><span>DDR</span><span>EM side channels</span></div>
+          <a class="lnk" href="#project-airgap">read more →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE455-Hardware-Security" target="_blank" rel="noopener">code →</a></article>
+        <article class="glass proj open" data-open="project-fpga-hls"><div class="hk">列</div><div class="tag">FPGA · HIGH-LEVEL SYNTHESIS</div><h3>Smith-Waterman on an FPGA</h3>
+          <p>Local sequence alignment profiled on x86 and ARM, then rebuilt as an anti-diagonal HLS accelerator for a Zynq board, pipelined down to II = 1.</p>
+          <div class="chips"><span>Vitis HLS</span><span>OpenCL / XRT</span><span>C</span><span>Zynq</span></div>
+          <a class="lnk" href="#project-fpga-hls">read more →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE340-Embedded-Systems" target="_blank" rel="noopener">code →</a></article>
+        <article class="glass proj open wide" data-open="project-pond"><div class="hk">池</div><div class="tag">SOFTWARE</div><h3>This Pond</h3>
           <p>The text-mode renderer behind this site: koi built from spine chains, caustics from drifting noise, procedural rain audio.</p>
           <div class="chips"><span>JavaScript</span><span>Canvas</span><span>WebAudio</span></div>
-          <a class="lnk" href="#project-pond">read more →</a><a class="lnk" href="#">code →</a></article>
+          <a class="lnk" href="#project-pond">read more →</a><a class="lnk" href="https://github.com/PANAGIVTHS/Pond-In-The-Rain" target="_blank" rel="noopener">code →</a></article>
+      </div>
+    </section>
+
+    <!-- ============ project page: GPGPU (shown at #project-gpgpu) ============ -->
+    <section id="project-gpgpu" class="projectPage" hidden>
+      <a class="back" href="#projects">← all work</a>
+      <div class="shead"><span class="kj">算</span>gpgpu</div>
+      <div class="glass">
+        <div class="tag">HARDWARE · GPU ARCHITECTURE · TEAM OF 3 · 2026 · ECE338 PARALLEL COMPUTER ARCHITECTURE</div>
+        <h2>GPGPU: a SIMT processor on an FPGA</h2>
+        <p>A general-purpose GPU core that we designed from an empty repository: a streaming multiprocessor of 32 RISC-V lanes executing in lockstep,
+          a memory subsystem that coalesces the lanes' accesses into AXI4 bursts to DDR, and a host interface with control registers, interrupts, fault reports
+          and performance counters. It runs on a Zynq-7020 next to the ARM cores. The ARM loads a compiled C kernel, starts it, and the kernel writes its frames into a
+          framebuffer that the board scans out over HDMI at 720p.</p>
+        <div class="chips"><span>SystemVerilog</span><span>RISC-V RV32I + MUL</span><span>SIMT</span><span>AXI4 / AXI4-Lite</span><span>Verilator</span><span>Vivado / Vitis</span><span>Zynq-7020</span><span>Python</span></div>
+        <div class="stats">
+          <div><b>32</b><span>lanes per SM, set by one parameter</span></div>
+          <div><b>5</b><span>stage pipeline, shared fetch/decode</span></div>
+          <div><b>720p</b><span>HDMI output from DDR framebuffers</span></div>
+          <div><b>45</b><span>directed RTL tests + random programs</span></div>
+        </div>
+
+        <h3>The system</h3>
+        <p>The GPU is a custom AXI IP in the FPGA fabric. The ARM processor sees it as a block of control registers on an AXI4-Lite port: it writes the kernel into
+          instruction memory, sets <code>CONTROL.START</code> and waits for the completion interrupt. The GPU reaches the board's DDR through its own AXI4 master on a
+          high-performance port, where two framebuffers and a general data region live. A VDMA reads the front framebuffer and streams it to an HDMI encoder.</p>
+        <figure class="diagram">
+          <svg viewBox="0 0 760 330" role="img" aria-label="System overview: the ARM host controls the GPGPU over AXI4-Lite; the GPGPU writes framebuffers in DDR over AXI4; a VDMA scans them out to HDMI">
+            <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="dgA"/></marker></defs>
+            <rect class="dgB" x="10" y="40" width="150" height="120" rx="6"/>
+            <text class="dgT" x="85" y="64" text-anchor="middle">Zynq PS</text>
+            <text class="dgS" x="85" y="84" text-anchor="middle">ARM Cortex-A9</text>
+            <text class="dgS" x="85" y="104" text-anchor="middle">bare-metal host driver</text>
+            <text class="dgS" x="85" y="124" text-anchor="middle">loads IMEM, starts,</text>
+            <text class="dgS" x="85" y="140" text-anchor="middle">reads perf counters</text>
+
+            <rect class="dgG" x="210" y="10" width="330" height="230" rx="8"/>
+            <text class="dgT" x="375" y="32" text-anchor="middle">GPGPU IP (programmable logic)</text>
+            <rect class="dgB" x="225" y="45" width="140" height="58" rx="5"/>
+            <text class="dgT" x="295" y="68" text-anchor="middle">CSRs · MMIO</text>
+            <text class="dgS" x="295" y="88" text-anchor="middle">control, IRQ, faults</text>
+            <rect class="dgB" x="385" y="45" width="140" height="58" rx="5"/>
+            <text class="dgT" x="455" y="68" text-anchor="middle">perf counters</text>
+            <text class="dgS" x="455" y="88" text-anchor="middle">per warp + memory</text>
+            <rect class="dgH" x="225" y="115" width="300" height="50" rx="5"/>
+            <text class="dgT" x="375" y="137" text-anchor="middle">streaming multiprocessor</text>
+            <text class="dgS" x="375" y="155" text-anchor="middle">32 RISC-V lanes in lockstep · IMEM 8 KB</text>
+            <rect class="dgB" x="225" y="177" width="300" height="50" rx="5"/>
+            <text class="dgT" x="375" y="199" text-anchor="middle">memory subsystem</text>
+            <text class="dgS" x="375" y="217" text-anchor="middle">DMEM 8 KB (BRAM) · coalescing DDR path</text>
+
+            <rect class="dgB" x="590" y="40" width="160" height="120" rx="6"/>
+            <text class="dgT" x="670" y="64" text-anchor="middle">PS DDR</text>
+            <text class="dgS" x="670" y="86" text-anchor="middle">FB0 / FB1</text>
+            <text class="dgS" x="670" y="102" text-anchor="middle">1280×720 × 32-bit</text>
+            <text class="dgS" x="670" y="124" text-anchor="middle">GMEM 8 MB</text>
+            <text class="dgS" x="670" y="140" text-anchor="middle">general data</text>
+
+            <rect class="dgB" x="590" y="200" width="160" height="58" rx="6"/>
+            <text class="dgT" x="670" y="222" text-anchor="middle">VDMA → rgb2dvi</text>
+            <text class="dgS" x="670" y="242" text-anchor="middle">HDMI 720p60</text>
+            <rect class="dgB" x="10" y="200" width="150" height="58" rx="6"/>
+            <text class="dgT" x="85" y="222" text-anchor="middle">UART / SSH</text>
+            <text class="dgS" x="85" y="242" text-anchor="middle">gpgpu CLI on a PC</text>
+
+            <path class="dgL" d="M160 80H225" marker-end="url(#ah)"/><text class="dgC" x="192" y="72" text-anchor="middle">AXI4-Lite</text>
+            <path class="dgL" d="M225 96H160" marker-end="url(#ah)"/><text class="dgC" x="192" y="112" text-anchor="middle">IRQ</text>
+            <path class="dgL" d="M525 202H572V100H590" marker-end="url(#ah)"/>
+            <text class="dgC" x="529" y="196">AXI4 HP0</text>
+            <path class="dgL" d="M670 160V200" marker-end="url(#ah)"/><text class="dgC" x="664" y="184" text-anchor="end">scan-out HP2</text>
+            <path class="dgL" d="M85 160V200" marker-start="url(#ah)" marker-end="url(#ah)"/>
+            <text class="dgC" x="375" y="290" text-anchor="middle">GPU clock ≈ 40 MHz · display on its own 100 MHz / 74.25 MHz clocks · three clock domains</text>
+            <text class="dgC" x="375" y="310" text-anchor="middle">Smart Zynq SL board (xc7z020)</text>
+          </svg>
+          <figcaption>System overview, drawn from the RTL and the Vivado block design.</figcaption>
+        </figure>
+
+        <h3>Inside the streaming multiprocessor</h3>
+        <p>The multiprocessor follows the SIMT model: one instruction stream drives every lane. Fetch and decode are shared, so the 32 lanes cost one
+          instruction memory and one decoder. Each lane (a <em>streaming processor</em>) has its own register file, ALU, three-stage DSP multiplier and
+          forwarding network, and carries the instruction through execute, memory and write-back. Register <code>x31</code> starts at the lane's index, which is how a
+          kernel tells its threads apart. A hazard unit tracks dependencies for the warp as a whole, because all lanes are at the same instruction.</p>
+        <figure class="diagram">
+          <svg viewBox="0 0 760 360" role="img" aria-label="Pipeline: shared fetch and decode feed 32 lanes, each with execute, memory and write-back stages; the lanes' memory requests go to a port controller with a BRAM backend and a DDR backend">
+            <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="dgA"/></marker></defs>
+            <rect class="dgB" x="10" y="120" width="96" height="70" rx="5"/>
+            <text class="dgT" x="58" y="146" text-anchor="middle">IF</text><text class="dgS" x="58" y="164" text-anchor="middle">PC · IMEM</text><text class="dgS" x="58" y="179" text-anchor="middle">2048 × 32</text>
+            <rect class="dgB" x="128" y="120" width="104" height="70" rx="5"/>
+            <text class="dgT" x="180" y="146" text-anchor="middle">ID</text><text class="dgS" x="180" y="164" text-anchor="middle">decoder</text><text class="dgS" x="180" y="179" text-anchor="middle">hazard unit</text>
+            <path class="dgL" d="M106 155H128" marker-end="url(#ah2)"/>
+            <path class="dgL" d="M232 155H262" marker-end="url(#ah2)"/>
+            <g>
+              <rect class="dgH" x="268" y="20" width="300" height="54" rx="5"/>
+              <text class="dgS" x="280" y="40">lane 0</text>
+              <rect class="dgB" x="330" y="30" width="78" height="34" rx="4"/><text class="dgS" x="369" y="44" text-anchor="middle">EX</text><text class="dgC" x="369" y="57" text-anchor="middle">ALU · MUL×3</text>
+              <rect class="dgB" x="414" y="30" width="62" height="34" rx="4"/><text class="dgS" x="445" y="51" text-anchor="middle">MEM</text>
+              <rect class="dgB" x="482" y="30" width="76" height="34" rx="4"/><text class="dgS" x="520" y="44" text-anchor="middle">WB</text><text class="dgC" x="520" y="57" text-anchor="middle">regfile 32×32</text>
+            </g>
+            <g>
+              <rect class="dgH" x="268" y="84" width="300" height="54" rx="5"/>
+              <text class="dgS" x="280" y="104">lane 1</text>
+              <rect class="dgB" x="330" y="94" width="78" height="34" rx="4"/><text class="dgS" x="369" y="108" text-anchor="middle">EX</text><text class="dgC" x="369" y="121" text-anchor="middle">ALU · MUL×3</text>
+              <rect class="dgB" x="414" y="94" width="62" height="34" rx="4"/><text class="dgS" x="445" y="115" text-anchor="middle">MEM</text>
+              <rect class="dgB" x="482" y="94" width="76" height="34" rx="4"/><text class="dgS" x="520" y="108" text-anchor="middle">WB</text><text class="dgC" x="520" y="121" text-anchor="middle">regfile 32×32</text>
+            </g>
+            <text class="dgT" x="418" y="166" text-anchor="middle">⋮   lanes 2 … 30   ⋮</text>
+            <g>
+              <rect class="dgH" x="268" y="184" width="300" height="54" rx="5"/>
+              <text class="dgS" x="280" y="204">lane 31</text>
+              <rect class="dgB" x="330" y="194" width="78" height="34" rx="4"/><text class="dgS" x="369" y="208" text-anchor="middle">EX</text><text class="dgC" x="369" y="221" text-anchor="middle">ALU · MUL×3</text>
+              <rect class="dgB" x="414" y="194" width="62" height="34" rx="4"/><text class="dgS" x="445" y="215" text-anchor="middle">MEM</text>
+              <rect class="dgB" x="482" y="194" width="76" height="34" rx="4"/><text class="dgS" x="520" y="208" text-anchor="middle">WB</text><text class="dgC" x="520" y="221" text-anchor="middle">regfile 32×32</text>
+            </g>
+            <path class="dgL" d="M262 47V211" /><path class="dgL" d="M262 47H268M262 111H268M262 211H268"/>
+            <path class="dgL" d="M445 238V270" marker-end="url(#ah2)"/>
+            <text class="dgS" x="452" y="258">one request per lane</text>
+            <rect class="dgG" x="180" y="272" width="570" height="78" rx="6"/>
+            <rect class="dgB" x="192" y="284" width="130" height="54" rx="4"/><text class="dgT" x="257" y="305" text-anchor="middle">port controller</text><text class="dgC" x="257" y="322" text-anchor="middle">decodes the address</text>
+            <rect class="dgB" x="342" y="284" width="130" height="54" rx="4"/><text class="dgT" x="407" y="305" text-anchor="middle">BRAM backend</text><text class="dgC" x="407" y="322" text-anchor="middle">DMEM, lowest lanes</text>
+            <rect class="dgB" x="492" y="284" width="246" height="54" rx="4"/><text class="dgT" x="615" y="305" text-anchor="middle">DDR backend</text><text class="dgC" x="615" y="322" text-anchor="middle">coalescing → write/read rings → AXI4</text>
+            <path class="dgL" d="M322 311H342" marker-end="url(#ah2)"/><path class="dgL" d="M472 311H492" marker-end="url(#ah2)"/>
+            <rect class="dgB" x="610" y="120" width="140" height="70" rx="5"/>
+            <text class="dgT" x="680" y="146" text-anchor="middle">exit + faults</text><text class="dgC" x="680" y="164" text-anchor="middle">ECALL 0 ends the kernel</text><text class="dgC" x="680" y="178" text-anchor="middle">lane faults recorded</text>
+            <path class="dgL" d="M568 155H610" marker-end="url(#ah2)"/>
+          </svg>
+          <figcaption>The multiprocessor pipeline. Fetch and decode are shared and broadcast to every lane; execute, memory and write-back are replicated per lane.</figcaption>
+        </figure>
+
+        <h3>Memory: turning 32 accesses into a few bursts</h3>
+        <p>Every lane can issue a load or store in the same cycle, so the memory subsystem is where most of the design effort went. A port controller decodes each
+          lane's address against the memory map and its permissions: local data memory in BRAM, the two framebuffers, or general memory in DDR. BRAM requests are
+          served by an arbiter that picks the lowest-numbered lanes each cycle. DDR requests go through a <span class="em">group former</span> that coalesces lanes
+          touching the same burst into one group. Groups enter a <span class="em">write ring</span> or a <span class="em">read ring</span>, whose slots track bursts in
+          flight in AXI order, so several bursts can be outstanding while the R and B responses come back. A lane that touches an unmapped or forbidden address, or gets
+          an AXI error, raises a fault that records the faulting PC and lanes for the host.</p>
+
+        <h3>Running real programs</h3>
+        <p>Kernels are ordinary C compiled with GCC for <code>rv32im</code>. A small runtime gives each lane its own stack and its thread index, and a kernel ends with
+          <code>ecall</code>: the warp stops issuing, lets older instructions drain, then raises the completion interrupt. Programs written for it include a Mandelbrot zoom, Julia sets, 2D and 3D N-body, metaballs, a ripple effect, a terrain renderer, a rotating cube, a triangle rasteriser and a Sobel filter, plus stress and fault-injection kernels.</p>
+
+        <h3>Verification</h3>
+        <ul>
+          <li>a Python model of the GPU produces the expected registers, data memory and DDR contents for every test program</li>
+          <li>45 directed test programs, plus a random program generator with reproducible seeds, run on the RTL in Verilator</li>
+          <li>three benches: the multiprocessor alone, end-to-end through the AXI4-Lite interface and IRQ, and the DDR path against an AXI4 slave model that injects latency, back-pressure and SLVERR/DECERR errors</li>
+          <li>a <code>gpgpu</code> command-line tool that drives Vivado, Vitis, Verilator, GCC and the board (build caching, waveforms, board upload) from one YAML configuration</li>
+        </ul>
+
+        <h3>What was hard</h3>
+        <p><span class="em">Getting the pipeline right before scaling it.</span> We started with a three-stage core, moved to five stages, added forwarding and a hazard
+          unit, and only then split it into a shared front end and per-lane back ends. Data hazards, stalls and a global memory stall all have to agree across 32 copies of the datapath.</p>
+        <p><span class="em">A monitor that went black.</span> Under heavy GPU load the HDMI monitor lost sync, while a capture card showed a perfect picture. We ruled out
+          the video pipeline, measured supply voltages with the XADC, estimated power and swept the GPU clock. The cause was the GPU's switching disturbing the global clock
+          network that fed the HDMI serializers. Moving their clock onto regional clock buffers next to the HDMI pins fixed it, with no RTL change.</p>
+
+        <h3>My part</h3>
+        <div class="mine">
+          <p>I built the first core: the original three- and five-stage pipelines, the hazard unit and forwarding, the split into a streaming multiprocessor and
+            per-lane streaming processors, scaling to any number of lanes, and the pipelined multiplier. I also wrote the first test infrastructure (the assembler, the
+            golden-state generator and the random tester), did the SystemVerilog migration of the core, and designed the experimental warp scheduler, scoreboard and warp
+            masks, each with its own testbench, as groundwork for running several warps.</p>
+          <p class="note">(Summarised from the commit history; check it and edit it to your own words.)</p>
+        </div>
+
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b><span>memory subsystem, AXI interfaces, HDMI, perf counters, tooling</span>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+            <div class="person"><b>Dimitrios Tsiantos</b><span>ISA coverage, demo programs, Verilator flow, CLI</span>
+              <a href="https://github.com/TsiantosD" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/tsiantosd/" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE338-Parallel-Computer-Architecture" target="_blank" rel="noopener">code →</a><a class="lnk" href="#projects">← back to all work</a>
+      </div>
+    </section>
+
+    <!-- ============ project page: CV32E40P (shown at #project-cv32e40p) ============ -->
+    <section id="project-cv32e40p" class="projectPage" hidden>
+      <a class="back" href="#projects">← all work</a>
+      <div class="shead"><span class="kj">核</span>cv32e40p</div>
+      <div class="glass">
+        <div class="tag">HARDWARE · MICROARCHITECTURE · TEAM OF 3 · 2026 · ECE494 MICROPROCESSOR DESIGN</div>
+        <h2>Faster CV32E40P by removing forwarding</h2>
+        <p>Forwarding saves stall cycles, but on an FPGA its multiplexers and long wires can become the critical path. We took CV32E40P, the OpenHW Group's four-stage
+          in-order RISC-V core, and built three variants that remove selected execute-stage forwarding paths: no multiplier forwarding, no ALU forwarding, and both.
+          Correctness is kept by stalling the dependent instruction until the value arrives through write-back. Each variant was then judged on Vivado post-implementation
+          reports <em>and</em> on cycle counts from real benchmarks, because a faster clock is only a win if the extra stalls don't eat it.</p>
+        <div class="chips"><span>SystemVerilog</span><span>RISC-V RV32IM</span><span>Vivado</span><span>ZedBoard</span><span>Icarus / sv2v</span><span>Python</span></div>
+        <div class="stats">
+          <div><b>73.2 MHz</b><span>no-MUL-forwarding variant, from 66.8 MHz</span></div>
+          <div><b>≈ −9%</b><span>execution time on benchmarks with no MUL dependencies</span></div>
+          <div><b>9.9%</b><span>break-even MUL dependency rate</span></div>
+          <div><b>+3%</b><span>LUTs, same DSPs, BRAM and power</span></div>
+        </div>
+        <figure><img src="img/cv32e40p/evaluation-pipeline.svg" alt="Evaluation pipeline: four RTL variants go through RTL tests, benchmarks and Vivado reports into comparison plots" loading="lazy"></figure>
+
+        <h3>Method</h3>
+        <ul>
+          <li>each variant lives in its own CV32E40P submodule and goes through the same flow</li>
+          <li>RTL regressions: assembly tests (including dependency stress cases) run in simulation and compared against a Python golden model</li>
+          <li>benchmarks: bare-metal RV32IM C programs (vvadd, median, sort, rsort, multiply, matrix multiply, Dhrystone, SHA-256, an IoT-style FSM, IPv4 packet processing) with region-of-interest cycle counts</li>
+          <li>Vivado: the same minimal ZedBoard wrapper (core + BRAM IMEM/DMEM) for every variant, scripted post-implementation timing, utilisation and power reports</li>
+        </ul>
+
+        <h3>Results</h3>
+        <table>
+          <tr><th>variant</th><th>period</th><th>WNS</th><th>est. Fmax</th><th>LUTs</th></tr>
+          <tr><td>baseline</td><td>15 ns</td><td>0.030 ns</td><td>66.8 MHz</td><td>4171</td></tr>
+          <tr><td>no MUL fwd</td><td>14 ns</td><td>0.339 ns</td><td><b>73.2 MHz</b></td><td>4314</td></tr>
+          <tr><td>no ALU fwd</td><td>15 ns</td><td>0.114 ns</td><td>67.2 MHz</td><td>4200</td></tr>
+          <tr><td>no ALU + MUL fwd</td><td>15 ns</td><td>0.630 ns</td><td>69.6 MHz</td><td>4186</td></tr>
+        </table>
+        <p>The baseline's critical path ran from the decode-stage operand registers into the register file, and 12.8 ns of its 14.9 ns was routing. A histogram of
+          the 1000 slowest paths showed the reason: the baseline's delays were smeared all the way up to 14.9 ns, a sign of routing congestion around the operand
+          multiplexers. Removing forwarding sources pulled that tail back below 14.2 ns.</p>
+        <figure class="light"><img src="img/cv32e40p/delay-histogram.png" alt="Histogram of Vivado datapath delays for the four variants" loading="lazy"><figcaption>Datapath delay of the 1000 slowest paths per variant.</figcaption></figure>
+        <p>A simple model tells when the trade pays off: with CPI 1 and one stall per dependent multiply, the faster clock wins while fewer than 9.9% of instructions
+          consume a multiply result immediately. The benchmarks agreed: programs with no such dependencies ran about 9% faster, <code>multiply</code> (7.7%) gained 2%, and
+          matrix multiplication (10.4%) lost 0.4%.</p>
+        <figure class="light"><img src="img/cv32e40p/benchmark-time.png" alt="Benchmark execution time per variant" loading="lazy"><figcaption>Region-of-interest execution time per benchmark and variant.</figcaption></figure>
+
+        <h3>My part</h3>
+        <div class="mine"><p class="note">Placeholder: describe what you did in this project (for example the RTL change, the benchmark flow or the analysis).</p></div>
+
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Dimitrios Tsiantos</b>
+              <a href="https://github.com/TsiantosD" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/tsiantosd/" target="_blank" rel="noopener">LinkedIn</a></div>
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE494-Microprocessor-Design" target="_blank" rel="noopener">code →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE494-Microprocessor-Design/blob/main/docs/reports/ece494-cv32e40p-forwarding-report.pdf" target="_blank" rel="noopener">report (pdf) →</a><a class="lnk" href="#projects">← back to all work</a>
+      </div>
+    </section>
+
+    <!-- ============ project page: CUDA N-body (shown at #project-nbody) ============ -->
+    <section id="project-nbody" class="projectPage" hidden>
+      <a class="back" href="#projects">← all work</a>
+      <div class="shead"><span class="kj">速</span>cuda n-body</div>
+      <div class="glass">
+        <div class="tag">GPU COMPUTING · TEAM OF 3 · 2025–2026 · ECE415 HIGH-PERFORMANCE COMPUTING</div>
+        <h2>CUDA N-body: 2910× faster</h2>
+        <p>The final project of a high-performance computing course: a simulator of many independent galaxy-like particle systems, where every body pulls on every other.
+          Starting from a sequential C version, we built an OpenMP version and then a ladder of CUDA versions, each one checked against the CPU output and measured
+          over 25 runs on a server with Tesla K80 GPUs.</p>
+        <div class="chips"><span>CUDA</span><span>OpenMP</span><span>C</span><span>Nsight</span><span>Tesla K80</span><span>Python plots</span></div>
+        <div class="stats">
+          <div><b>2910×</b><span>over the sequential CPU version</span></div>
+          <div><b>431</b><span>billion interactions per second</span></div>
+          <div><b>0.10 s</b><span>from 293 s for the same run</span></div>
+          <div><b>4</b><span>GPUs used at once</span></div>
+        </div>
+        <figure class="narrow"><img src="img/hpc/nbody.webp" alt="Animation of the simulated galaxy" loading="lazy"><figcaption>One simulated galaxy, from the project's visualiser.</figcaption></figure>
+
+        <h3>The optimisation ladder</h3>
+        <table>
+          <tr><th>version</th><th>billion interactions/s</th><th>speed-up</th></tr>
+          <tr><td>sequential CPU</td><td>0.15</td><td>1×</td></tr>
+          <tr><td>OpenMP (systems in parallel, SIMD, SoA)</td><td>10.6</td><td>72×</td></tr>
+          <tr><td>naive CUDA, one thread per body</td><td>29.2</td><td>197×</td></tr>
+          <tr><td>CUDA streams, one per system</td><td>40.0</td><td>270×</td></tr>
+          <tr><td>Structure of Arrays (coalesced loads)</td><td>40.9</td><td>276×</td></tr>
+          <tr><td>shared-memory tiling</td><td>54.7</td><td>369×</td></tr>
+          <tr><td>read-only cache, FMA, <code>rsqrtf</code></td><td>84.7</td><td>571×</td></tr>
+          <tr><td>multiple GPUs</td><td>322</td><td>2175×</td></tr>
+          <tr><td>launch bounds + padding to remove divergence</td><td><b>431</b></td><td><b>2910×</b></td></tr>
+        </table>
+        <figure class="light"><img src="img/hpc/nbody-throughput.png" alt="Box plot of throughput for every version" loading="lazy"><figcaption>Throughput of every version over 25 runs.</figcaption></figure>
+
+        <h3>What we learned</h3>
+        <p><span class="em">Occupancy isn't everything.</span> Asking <code>__launch_bounds__</code> for four blocks per SM capped the kernel at 64 registers and
+          caused heavy register spilling; allowing two blocks per SM gave it 128 registers, no spills, and about twice the throughput. The compiler's
+          <code>-Xptxas -v</code> output showed exactly why.</p>
+        <p><span class="em">Not every textbook trick helps.</span> Thread coarsening on its own made the kernel slower (72 vs 85 billion interactions/s), because of the extra register pressure.</p>
+
+        <h3>The rest of the course</h3>
+        <figure><img src="img/hpc/lab-map.svg" alt="ECE415 labs: Sobel CPU optimisation, OpenMP K-means, CUDA convolution, CUDA CLAHE, N-body" loading="lazy"></figure>
+        <ul>
+          <li><b>Sobel on one CPU core:</b> loop interchange, unrolling, fusion, strength reduction and faster maths gave up to 21× with the Intel compiler</li>
+          <li><b>OpenMP K-means:</b> parallel loops with critical sections, atomics and SIMD reductions, compared by timing</li>
+          <li><b>CUDA 2D convolution:</b> block sizing, padding to remove divergence, float vs double precision and memory-to-FLOP ratios</li>
+          <li><b>CUDA CLAHE:</b> privatised histograms, an inclusive parallel scan, coalesced access, streams and events; 1.9× over our first GPU version and about 24× over the CPU</li>
+        </ul>
+
+        <h3>My part</h3>
+        <div class="mine"><p class="note">Placeholder: describe what you did in these labs.</p></div>
+
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+            <div class="person"><b>Dimitrios Tsiantos</b>
+              <a href="https://github.com/TsiantosD" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/tsiantosd/" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE415-High-Performance-Computing" target="_blank" rel="noopener">code →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE415-High-Performance-Computing/blob/main/docs/reports/lab-5-nbody-simulation-report.pdf" target="_blank" rel="noopener">report (pdf, Greek) →</a><a class="lnk" href="#projects">← back to all work</a>
+      </div>
+    </section>
+
+    <!-- ============ project page: air-gap (shown at #project-airgap) ============ -->
+    <section id="project-airgap" class="projectPage" hidden>
+      <a class="back" href="#projects">← all work</a>
+      <div class="shead"><span class="kj">漏</span>air-gap exfiltration</div>
+      <div class="glass">
+        <div class="tag">HARDWARE SECURITY · TEAM OF 3 · 2025–2026 · ECE455 HARDWARE SECURITY</div>
+        <h2>Leaking data through DDR emissions</h2>
+        <p>Air-gapped computers have no network, so they are assumed to keep their secrets. But every fast-switching bus radiates, and DDR memory switches very fast.
+          We built a complete covert channel: an unprivileged program on the target encodes data in the pattern of its memory traffic, and a software-defined radio
+          nearby turns the resulting electromagnetic noise back into bits.</p>
+        <div class="chips"><span>C</span><span>SSE2 non-temporal stores</span><span>ADALM-PLUTO SDR</span><span>GNU Radio</span><span>OOK</span><span>Python</span></div>
+        <div class="stats">
+          <div><b>2 m</b><span>longest successful transfer</span></div>
+          <div><b>128 bit/s</b><span>highest bitrate decoded</span></div>
+          <div><b>0</b><span>privileges or hardware changes on the target</span></div>
+        </div>
+
+        <h3>How it works</h3>
+        <ul>
+          <li><b>Transmitter:</b> a user-space C program sends each bit as a time slot. For a 1 it hammers memory, for a 0 it stays idle. It uses non-temporal
+            (cache-bypassing) stores so the traffic really reaches the DDR bus instead of staying in the CPU caches.</li>
+          <li><b>Framing:</b> a preamble (<code>10101001</code>) for alignment and an end-of-message marker, so the receiver can find a payload such as a 128-bit AES key.</li>
+          <li><b>Receiver:</b> an ADALM-PLUTO SDR tuned to the memory bus emissions, with a GNU Radio flowgraph that filters the band and demodulates the on-off keying into a bitstream.</li>
+          <li><b>Recovery:</b> Python tools align on the preamble, decode the message and count bit errors against the original.</li>
+        </ul>
+        <figure><img src="img/airgap/demo.webp" alt="GNU Radio receiving the signal while a script prints the decoded message" loading="lazy"><figcaption>Receiving and decoding a message live.</figcaption></figure>
+        <figure class="narrow"><img src="img/airgap/setup.jpg" alt="The SDR antenna in front of the target laptop" loading="lazy"><figcaption>The setup: the SDR in front, the target laptop behind.</figcaption></figure>
+
+        <h3>Results</h3>
+        <p>We logged runs at 25, 50 and 100 cm across bitrates from 2 to 128 bit/s, with bit-error counts for each, including perfect transfers of the AES key.
+          The longest successful transfer was at 2 metres, at 128 bit/s.</p>
+
+        <h3>My part</h3>
+        <div class="mine"><p class="note">Placeholder: describe what you did (for example the transmitter, the receiver flowgraph or the measurements).</p></div>
+
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Dimitrios Tsiantos</b>
+              <a href="https://github.com/TsiantosD" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/tsiantosd/" target="_blank" rel="noopener">LinkedIn</a></div>
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE455-Hardware-Security" target="_blank" rel="noopener">code →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE455-Hardware-Security/blob/main/docs/reports/ece455-hardware-security-report.pdf" target="_blank" rel="noopener">report (pdf) →</a><a class="lnk" href="#projects">← back to all work</a>
+      </div>
+    </section>
+
+    <!-- ============ project page: FPGA HLS (shown at #project-fpga-hls) ============ -->
+    <section id="project-fpga-hls" class="projectPage" hidden>
+      <a class="back" href="#projects">← all work</a>
+      <div class="shead"><span class="kj">列</span>fpga acceleration</div>
+      <div class="glass">
+        <div class="tag">FPGA · HIGH-LEVEL SYNTHESIS · TEAM OF 2 · 2025 · ECE340 EMBEDDED SYSTEMS</div>
+        <h2>Smith-Waterman on an FPGA</h2>
+        <p>Smith-Waterman finds the best-matching region between two DNA or protein sequences by filling a scoring matrix where every cell depends on its left,
+          upper and upper-left neighbours. We optimised it in software on x86 and on the Zynq's ARM core first, then redesigned it as a hardware kernel with Vitis HLS and OpenCL/XRT.</p>
+        <div class="chips"><span>C</span><span>Vitis HLS</span><span>OpenCL / XRT</span><span>Zynq ARM</span><span>perf</span><span>Intel Advisor</span></div>
+        <figure><img src="img/fpga-hls/workflow.svg" alt="Workflow: C baselines, profiling, HLS/OpenCL kernels, results" loading="lazy"></figure>
+
+        <h3>Software first</h3>
+        <p>Six software versions on x86 reached <span class="em">3.81×</span> on the largest input: branch-free maximums that compile to <code>cmov</code> (95× fewer branch
+          misses), reusing each cell's neighbours in registers instead of reloading them, and padding to drop edge checks. A roofline model from Intel Advisor
+          showed each version moving away from the memory-bandwidth limit. On the ARM core the same code behaved differently: there is no <code>cmov</code>, and the cache-unfriendly anti-diagonal version was slower than the original.</p>
+
+        <h3>Then hardware</h3>
+        <p>The cells on one anti-diagonal don't depend on each other, so the kernel walks the matrix diagonal by diagonal and computes a whole diagonal in parallel. Seven
+          implementations, each analysed in Vitis, got there step by step:</p>
+        <ul>
+          <li>keep only the three live diagonals in a circular buffer instead of the whole matrix</li>
+          <li>cyclic array partitioning (factor 16) for parallel BRAM access, then <code>BIND_STORAGE</code> to move arrays from LUTs into BRAM</li>
+          <li>exact bit-widths for every variable, which cut LUT, flip-flop and BRAM use</li>
+          <li>the maximum search moved out of the main loops, and a shift-register sliding window over the database string</li>
+          <li>breaking the loop-carried dependency between the max tracking and the diagonal pointer, the last thing between II = 2 and <span class="em">II = 1</span></li>
+        </ul>
+
+        <h3>What didn't work</h3>
+        <p>Every implementation passed software and hardware emulation, but most failed when deployed on the board. We traced the problem to the kernel code itself, not the host
+          program or the tools, but ran out of time before finding it. One variant did run on the FPGA: Vitis estimated 1.6 ms for a 32 × 65536 input, and the board measured 8.8 ms.</p>
+
+        <h3>Also in the course</h3>
+        <figure><img src="img/fpga-hls/lab-map.svg" alt="ECE340 labs: floating-point adder, Zynq ARM and custom AXI IP, HLS/OpenCL accelerator" loading="lazy"></figure>
+
+        <h3>My part</h3>
+        <div class="mine"><p class="note">Placeholder: describe what you did.</p></div>
+
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE340-Embedded-Systems" target="_blank" rel="noopener">code →</a><a class="lnk" href="https://github.com/PANAGIVTHS/ECE340-Embedded-Systems/blob/main/docs/reports/lab-3-local-sequence-alignment-fpga-report.pdf" target="_blank" rel="noopener">report (pdf) →</a><a class="lnk" href="#projects">← back to all work</a>
       </div>
     </section>
 
@@ -118,12 +529,171 @@
       </div>
     </section>
 
+    <section id="coursework">
+      <div class="shead"><span class="kj">学</span>coursework</div>
+      <div class="glass">
+        <p>Course projects from the Electrical and Computer Engineering program at the University of Thessaly. The larger ones have their own page under selected work.</p>
+        <div class="courses">
+          <a class="course" href="#project-gpgpu"><span class="code">ECE338</span><b>Parallel Computer Architecture</b><span>a SIMT GPGPU in SystemVerilog</span></a>
+          <a class="course" href="#project-cv32e40p"><span class="code">ECE494</span><b>Microprocessor Design</b><span>CV32E40P forwarding and FPGA timing</span></a>
+          <a class="course" href="#project-nbody"><span class="code">ECE415</span><b>High-Performance Computing</b><span>CPU tuning, OpenMP, CUDA, multi-GPU N-body</span></a>
+          <a class="course" href="#project-airgap"><span class="code">ECE455</span><b>Hardware Security</b><span>DDR electromagnetic covert channel</span></a>
+          <a class="course" href="#project-fpga-hls"><span class="code">ECE340</span><b>Embedded Systems</b><span>FP adder RTL, Zynq + AXI IP, HLS accelerator</span></a>
+          <a class="course" href="#course-ece333"><span class="code">ECE333</span><b>Digital Systems Lab</b><span>FPGA drivers: 7-segment, UART, VGA, SPI accelerometer</span></a>
+          <a class="course" href="#course-ece219"><span class="code">ECE219</span><b>Computer Organization</b><span>MIPS, a single-cycle CPU in Verilog, caches</span></a>
+          <a class="course" href="#course-ece433"><span class="code">ECE433</span><b>Computer Graphics</b><span>rasterisation, clipping, an OpenGL 3D house</span></a>
+          <a class="course" href="#course-ece318"><span class="code">ECE318</span><b>Operating Systems</b><span>kernel modules, scheduling, a deduplicating FUSE filesystem</span></a>
+          <a class="course" href="#course-ece321"><span class="code">ECE321</span><b>Concurrent Programming</b><span>semaphores, monitors, a user-level thread runtime</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ course page: ECE333 (shown at #course-ece333) ============ -->
+    <section id="course-ece333" class="projectPage" hidden>
+      <a class="back" href="#coursework">← all coursework</a>
+      <div class="shead"><span class="kj">学</span>ece333</div>
+      <div class="glass">
+        <div class="tag">FPGA · VERILOG · SOLO · 2024 · ECE333 DIGITAL SYSTEMS LAB</div>
+        <h2>FPGA drivers from scratch</h2>
+        <p>Four lab projects on a Xilinx FPGA board, each written in Verilog with its own testbenches and report. They built up from blinking segments to a video output.</p>
+        <div class="chips"><span>Verilog</span><span>Vivado</span><span>testbenches</span><span>VGA</span><span>UART</span><span>SPI</span></div>
+        <ul>
+          <li><b>Seven-segment display:</b> character and anode decoders, scrolling messages, and a button debouncer</li>
+          <li><b>UART:</b> transmitter and receiver with a baud-rate controller, busy/valid handshakes, and parity and framing error detection, verified with testbenches and on the board</li>
+          <li><b>VGA controller:</b> an HSYNC/VSYNC timing FSM on a 25 MHz pixel clock, an image held in BRAM, a short video played from more than 60 frames stored in BRAM,
+            and a sprite that moves around the screen and bounces off its edges</li>
+          <li><b>ADXL362 accelerometer:</b> an SPI master and a controller that configures the sensor and streams its readings to a PC over the UART</li>
+        </ul>
+        <figure class="light"><img src="img/ece333/vga-dataflow.png" alt="Dataflow of the VGA controller: pixel clock, horizontal and vertical counters, sync handlers, address generator, pixel unit and BRAM" loading="lazy"><figcaption>Dataflow of the VGA controller, from the original design notes.</figcaption></figure>
+        <div class="collab"><div class="tag">COLLABORATORS</div><p class="note">None: solo work.</p></div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/Vivado-Projects" target="_blank" rel="noopener">code →</a><a class="lnk" href="#coursework">← back to coursework</a>
+      </div>
+    </section>
+
+    <!-- ============ course page: ECE219 (shown at #course-ece219) ============ -->
+    <section id="course-ece219" class="projectPage" hidden>
+      <a class="back" href="#coursework">← all coursework</a>
+      <div class="shead"><span class="kj">学</span>ece219</div>
+      <div class="glass">
+        <div class="tag">COMPUTER ARCHITECTURE · TEAM OF 2 · 2023–2024 · ECE219 COMPUTER ORGANIZATION</div>
+        <h2>From MIPS assembly to a CPU in Verilog</h2>
+        <p>The course where processors stopped being black boxes: writing MIPS assembly, comparing it with what a C compiler generates, then building the datapath and
+          control of a CPU in Verilog, and finally measuring how code meets the cache.</p>
+        <div class="chips"><span>Verilog</span><span>MIPS assembly</span><span>C</span><span>Icarus Verilog</span><span>perf</span></div>
+        <ul>
+          <li>MIPS assembly programs, and C programs compared against their generated assembly</li>
+          <li>an ALU and register file, then a single-cycle CPU datapath and control unit with testbenches and program memories</li>
+          <li>an extended CPU with more instructions, and variants that clock the register file on different edges</li>
+          <li>a K-means image clustering program optimised for the cache, and loop experiments compared at <code>-O0</code> and <code>-O3</code></li>
+        </ul>
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE219-Computer-Organization" target="_blank" rel="noopener">code →</a><a class="lnk" href="#coursework">← back to coursework</a>
+      </div>
+    </section>
+
+    <!-- ============ course page: ECE433 (shown at #course-ece433) ============ -->
+    <section id="course-ece433" class="projectPage" hidden>
+      <a class="back" href="#coursework">← all coursework</a>
+      <div class="shead"><span class="kj">学</span>ece433</div>
+      <div class="glass">
+        <div class="tag">GRAPHICS · C++ / OPENGL · TEAM OF 3 · 2025–2026 · ECE433 COMPUTER GRAPHICS</div>
+        <h2>Rasterisation to a 3D house</h2>
+        <p>The classic graphics pipeline built up by hand, ending in an explorable OpenGL scene that grew into a small rendering framework.</p>
+        <div class="chips"><span>C++</span><span>OpenGL / GLUT</span><span>rasterisation</span><span>lighting</span><span>NURBS</span></div>
+        <ul>
+          <li><b>Rasterisation:</b> Bresenham-style lines, Xiaolin Wu antialiasing, circles and filled circles with interactive drawing tools</li>
+          <li><b>Polygons:</b> scanline filling with colour interpolation, and Sutherland-Hodgman clipping</li>
+          <li><b>3D house:</b> a hierarchical object system, display lists for static geometry, depth-sorted transparency for glass, a day/night cycle with a moving sun
+            and moon, several dynamic lights and a flashlight, textures, OBJ models, NURBS terrain, and assets that reload without recompiling</li>
+        </ul>
+        <div class="pair">
+          <figure><img src="img/ece433/house-day.jpg" alt="The house by day" loading="lazy"></figure>
+          <figure><img src="img/ece433/house-night.jpg" alt="The house at night" loading="lazy"></figure>
+        </div>
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+            <div class="person"><b>Anastasios Kalousis</b>
+              <a href="https://github.com/AnastasisK126" target="_blank" rel="noopener">GitHub</a><span class="ph">LinkedIn: add link</span></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE433-Computer-Graphics" target="_blank" rel="noopener">code →</a><a class="lnk" href="#coursework">← back to coursework</a>
+      </div>
+    </section>
+
+    <!-- ============ course page: ECE318 (shown at #course-ece318) ============ -->
+    <section id="course-ece318" class="projectPage" hidden>
+      <a class="back" href="#coursework">← all coursework</a>
+      <div class="shead"><span class="kj">学</span>ece318</div>
+      <div class="glass">
+        <div class="tag">SYSTEMS · C · TEAM OF 3 · 2025 · ECE318 OPERATING SYSTEMS</div>
+        <h2>Kernel modules to a deduplicating filesystem</h2>
+        <p>Three projects that went from small changes inside the Linux kernel to a complete filesystem in user space.</p>
+        <div class="chips"><span>C</span><span>Linux kernel</span><span>FUSE</span><span>SHA-1</span><span>Python tests</span></div>
+        <ul>
+          <li><b>Kernel interfaces:</b> a sysfs module, a new system call, and changes to the Kyber I/O scheduler module</li>
+          <li><b>CPU scheduling:</b> a scheduler simulator comparing Shortest Job First with a goodness score that also counts time waiting in the ready queue</li>
+          <li><b>Deduplicating FUSE filesystem:</b> files are split into 4 KB blocks keyed by their SHA-1 hash, each distinct block is stored once with a reference count,
+            freed slots go on a circular free list with partial defragmentation, and the metadata survives remounts. As a stress test, a Minecraft server ran on top of it.</li>
+        </ul>
+        <figure><img src="img/ece318/dedup-architecture.svg" alt="Deduplicating filesystem: FUSE layer, metadata, shared block repository with reference counts" loading="lazy"></figure>
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+            <div class="person"><b>Dimitrios Tsiantos</b>
+              <a href="https://github.com/TsiantosD" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/tsiantosd/" target="_blank" rel="noopener">LinkedIn</a></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE318-Operating-Systems" target="_blank" rel="noopener">code →</a><a class="lnk" href="#coursework">← back to coursework</a>
+      </div>
+    </section>
+
+    <!-- ============ course page: ECE321 (shown at #course-ece321) ============ -->
+    <section id="course-ece321" class="projectPage" hidden>
+      <a class="back" href="#coursework">← all coursework</a>
+      <div class="shead"><span class="kj">学</span>ece321</div>
+      <div class="glass">
+        <div class="tag">SYSTEMS · C · TEAM OF 3 · 2024–2025 · ECE321 CONCURRENT PROGRAMMING</div>
+        <h2>Synchronisation, down to a thread runtime</h2>
+        <p>Concurrency problems solved with pthreads, then with our own semaphores and monitors, and finally on a user-level thread runtime we wrote ourselves.</p>
+        <div class="chips"><span>C</span><span>pthreads</span><span>ucontext</span><span>signals</span><span>semaphores</span></div>
+        <ul>
+          <li>a bounded FIFO pipe library, a master/worker primality tester and a parallel external mergesort</li>
+          <li>binary semaphores, and classic coordination problems (a narrow bridge, a train and its passengers, readers/writers) with semaphores and monitors</li>
+          <li>coroutines over <code>getcontext</code>/<code>swapcontext</code>, then a user-level thread runtime with round-robin scheduling, timer-signal preemption,
+            <code>yield</code>, <code>sleep</code>, <code>join</code> and its own semaphores, with the earlier programs ported to run on it</li>
+        </ul>
+        <figure><img src="img/ece321/user-level-runtime.svg" alt="User-level thread runtime: ported workloads, runtime API, scheduler, coroutines" loading="lazy"></figure>
+        <div class="collab">
+          <div class="tag">COLLABORATORS</div>
+          <div class="people">
+            <div class="person"><b>Jason Nikas</b>
+              <a href="https://github.com/ACrispyCookie" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/jason-nikas-b64163255" target="_blank" rel="noopener">LinkedIn</a></div>
+            <!-- PLACEHOLDER: full name of Tvangos -->
+            <div class="person"><b>Teo <span class="ph">(full name)</span></b>
+              <a href="https://github.com/Tvangos" target="_blank" rel="noopener">GitHub</a><span class="ph">LinkedIn: add link</span></div>
+          </div>
+        </div>
+        <a class="lnk" href="https://github.com/PANAGIVTHS/ECE321-Concurrent-Programming" target="_blank" rel="noopener">code →</a><a class="lnk" href="#coursework">← back to coursework</a>
+      </div>
+    </section>
+
     <section id="tools">
       <div class="shead"><span class="kj">道</span>tools of the trade</div>
       <div class="glass"><div class="cols">
-        <div><div class="tag">HARDWARE</div><ul><li>KiCad · PCB layout</li><li>Verilog / SystemVerilog</li><li>FPGA toolchains</li><li>soldering & bring-up</li></ul></div>
-        <div><div class="tag">SOFTWARE</div><ul><li>C / C++ / Rust</li><li>Python · TypeScript</li><li>Linux & embedded</li><li>graphics & shaders</li></ul></div>
-        <div><div class="tag">GAMES</div><ul><li>Godot · Unity</li><li>pixel & ASCII art</li><li>sound design</li><li>quiet game feel</li></ul></div>
+        <div><div class="tag">HARDWARE</div><ul><li>SystemVerilog · Verilog</li><li>RISC-V microarchitecture</li><li>AXI4 / AXI4-Lite</li><li>Vivado · Vitis · Vitis HLS</li><li>Verilator · Icarus</li><li>timing closure on FPGAs</li></ul></div>
+        <div><div class="tag">PARALLEL &amp; GPU</div><ul><li>CUDA · multi-GPU</li><li>OpenMP · pthreads</li><li>profiling (perf, Nsight, Advisor)</li><li>memory-hierarchy tuning</li></ul></div>
+        <div><div class="tag">SOFTWARE</div><ul><li>C · C++ · Python</li><li>Linux · kernel modules · FUSE</li><li>OpenGL</li><li>GNU Radio · SDR</li></ul></div>
       </div></div>
     </section>
 
@@ -131,7 +701,9 @@
       <div class="shead"><span class="kj">文</span>send a lantern</div>
       <div class="glass">
         <h2>Say hello.</h2>
-        <p>Every message is released into the pond as a lantern. You can also write to <span class="em">you@example.com</span>.</p>
+        <p>Every message is released into the pond as a lantern. You can also write to <span class="em">you@example.com</span>,
+          or find me on <a class="lnk inline" href="https://github.com/PANAGIVTHS" target="_blank" rel="noopener">GitHub</a> and
+          <a class="lnk inline" href="https://www.linkedin.com/in/panagiotis-nikolaos-tsogkas-650871293/" target="_blank" rel="noopener">LinkedIn</a>.</p>
         <form id="form">
           <input id="fName" placeholder="your name" autocomplete="off">
           <textarea id="fMsg" rows="4" placeholder="your message"></textarea>
@@ -144,6 +716,7 @@
     <footer>雨の池 · made of text and rain</footer>
   </div>
 </main>
+
 
 <div id="intro">
   <div class="k">雨の池</div>
